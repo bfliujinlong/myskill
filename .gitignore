@@ -56,3 +56,8 @@ skills/.archive/
 skills/.bundled_manifest
 skills/.usage.json
 skills/.locks/
+**/.env
+**/credentials/
+**/__pycache__/
+**/*.pyc
+**/node_modules/
