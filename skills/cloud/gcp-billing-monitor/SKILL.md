@@ -154,6 +154,18 @@ On the Hermes host (project `cryptic-bivouac-471612-t0`, numeric 237001753296):
 => On this host the cost figure is **unknown**, never "$0". Report it as UNKNOWN and say the console
 activation URL must be opened by an Owner/Billing Admin.
 
+### 5b. This is a persistent, self-inflicted cron failure — stop re-reporting it as news
+
+Verified 2026-10-25 across `~/.hermes/cron/output/2d995a116710/`: all 30 daily runs failed to obtain a
+real cost figure. 3 runs (10-17, 10-23, 10-24) carry the explicit `SERVICE_DISABLED` string; the rest fail
+the same way with a different wording. The blocker is a **console action by an Owner/Billing Admin** and
+will never self-heal by re-running the cron.
+
+So on each run: re-run the script once (cheap, confirms nothing changed), say "still blocked, unchanged",
+and put the activation URL + the one human action needed in the report. Do not spend turns re-diagnosing,
+and do not phrase a repeat failure as a new incident. If the user has not acted on the URL after several
+runs, say plainly that the job cannot do its job until they do, rather than generating another full report.
+
 ### 6. SMS channel is not configured — do not claim it sent
 
 `gcp-billing-monitor.py` reads `SMS_GATEWAY_URL` / `TWILIO_*`; neither exists in `~/.hermes/.env`.
