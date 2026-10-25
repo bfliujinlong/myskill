@@ -1,0 +1,13 @@
+[Unit]
+Description=Codex/CC/Cursor Free Model Gateway (litellm -> nous/OR/Azure free routing)
+After=network.target
+
+[Service]
+EnvironmentFile=/home/ubuntu/.hermes/.env
+Environment=PATH=/home/ubuntu/.litellm-venv/bin:/usr/bin:/bin
+ExecStart=/home/ubuntu/.hermes/deploy/start_litellm.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

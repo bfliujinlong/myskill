@@ -1,0 +1,4 @@
+{
+  "tokens": {"KPI_ARR": "1,284 万", "USERS_Q3": "18,902", "GROWTH_QOQ": "23.4%"},
+  "charts": {"slide3/Chart 2": {"categories": ["Q1","Q2","Q3","Q4"], "series": {"营收": [980, 1102, 1284, 1490]}}}
+}

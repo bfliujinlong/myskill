@@ -1,0 +1,71 @@
+# Model Discovery — User Configuration
+# ====================================
+# Stored at: ~/.hermes/model-discovery/config.yaml
+# Permissions: 0600 (owner read/write only)
+#
+# This file controls:
+#   - custom_platforms:  platforms not in the primary curated source
+#   - api_keys:          mapping of platform name → API key (strings)
+#   - settings:          probe behaviour tuning
+#
+# SECURITY:
+#   Protect this file like a password file. Do NOT commit to git.
+#   Add to ~/.gitignore or your dotfiles repo's ignore list.
+#   For stronger protection, encrypt with age/gpg before storing:
+#     age -r <pubkey> -o config.yaml.age config.yaml
+#   If you encrypt, decrypt before each run, or extend discover.py/probe.py
+#   to call age/gpg automatically.
+
+settings:
+  # Minimum seconds between probes to avoid hammering free tiers
+  min_delay_between_probes: 3.0
+  # Request timeout per probe (seconds)
+  request_timeout: 25
+  # Minimal probe prompt (kept short to be cheap)
+  probe_prompt: "Say exactly: hello"
+  # Max tokens for probe response
+  probe_max_tokens: 16
+
+# Custom platforms not yet in the curated source (mnfst/awesome-free-llm-apis).
+# Use this to add:
+#   - new platforms the skill hasn't discovered yet
+#   - platforms that require registration but no formal "API key"
+#   - self-hosted endpoints (Ollama, llama.cpp server, vLLM)
+#   - regional endpoints you prefer
+#
+# Each entry needs at minimum: name, base_url
+# Optional fields help the skill give better recommendations.
+custom_platforms: []
+
+# API keys — mapping of platform name (as it appears in the catalog or
+# custom_platforms) to the secret string.
+#
+# SECURITY: treat this section as secret. Consider encrypting the whole file.
+# The probe.py script reads keys from here at runtime and never prints them.
+#
+# Example:
+#   api_keys:
+#     OpenRouter: "sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#     Groq: "gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#     Mistral: "ms-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#     Google Gemini: "AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#     Z AI: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#     Aion Labs: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#     Cloudflare: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#     Ollama Cloud: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+api_keys: {}
+
+# Registration tracking (optional): which platforms have you already signed up
+# for, and with what email? Helps the skill avoid suggesting re-registration
+# and lets probe.py know a key MAY exist even if not yet in api_keys.
+registered:
+  # Example:
+  #   OpenRouter:
+  #     email: "vliujinlong@qq.com"
+  #     registered_at: "2026-09-01"
+  #     notes: "Used :free models, no credit card"
+  #   Groq:
+  #     email: "vliujinlong@qq.com"
+  #     registered_at: "2026-09-02"
+  #     notes: ""
+  {}

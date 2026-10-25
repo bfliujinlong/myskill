@@ -1,0 +1,26 @@
+{
+  "model": "claude-sonnet-4-20250514",
+  "providers": {
+    "free_poll": {
+      "type": "openai-compatible",
+      "strategy": "round-robin",
+      "models": [
+        {"base_url": "http://localhost:4101/v1", "model": "hy3", "api_key_env": "CURSOR_LOCAL_KEY"},
+        {"base_url": "http://localhost:4101/v1", "model": "gpt-5.2", "api_key_env": "CURSOR_LOCAL_KEY"},
+        {"base_url": "http://localhost:4101/v1", "model": "gpt-5.1", "api_key_env": "CURSOR_LOCAL_KEY"},
+        {"base_url": "http://localhost:4101/v1", "model": "gpt-4o", "api_key_env": "CURSOR_LOCAL_KEY"}
+      ]
+    },
+    "openai_fallback": {
+      "type": "azure-openai",
+      "base_url": "https://liujl-9958-resource.openai.azure.com/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-04-01-preview",
+      "model": "gpt-5-mini",
+      "api_key": "REPLACE_WITH_YOUR_AZURE_KEY"
+    }
+  },
+  "env": {
+    "NOUS_API_KEY": "sk-nous-iJ769NIgX3rdTHFIh99vBokEJ38ZP1yx",
+    "OPENROUTER_API_KEY": "REPLACE_WITH_YOUR_OPENROUTER_KEY",
+    "CURSOR_LOCAL_KEY": "sk-local-litellm-placeholder"
+  }
+}

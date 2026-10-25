@@ -1,0 +1,29 @@
+# Credential storage for model-discovery skill
+# Format: mapping of platform name -> API key (plain string)
+#
+# SECURITY:
+#   This file is stored at ~/.hermes/model-discovery/api_keys.yaml
+#   with permissions 0600 (owner read/write only).
+#   DO NOT commit this file to any git repository.
+#   Add it to .gitignore if you use a dotfiles repo.
+#
+#   For stronger protection, encrypt with age/gpg before storing:
+#     age -r <pubkey> -o api_keys.yaml.age api_keys.yaml
+#     Replace this file with the .age file and decrypt on use.
+#
+#   Hermes never exposes these values in logs or summaries.
+#   Keys are only injected into probe.py at runtime.
+#
+# Example:
+#   OpenRouter: sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#   Groq: gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#   Mistral: ms-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#   Google Gemini: AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#   OVHcloud: (no key needed for anonymous tier)
+#   Cohere: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#   Z AI / Zhipu: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#   Cerebras: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#   Cloudflare: (needs account ID + API token; see custom_platforms)
+#   Aion Labs: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#
+# Empty file is valid — defines the mapping with no keys stored yet.

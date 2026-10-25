@@ -1,0 +1,15 @@
+[Unit]
+Description=Hermes relay (Siri/iPhone shortcut -> Hermes via CF tunnel, no Telegram)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/oci-monitor
+# 必须用 Hermes venv 的 python (系统 python3 缺 fastapi/uvicorn)
+ExecStart=/home/ubuntu/.hermes/hermes-install/venv/bin/python3 /home/ubuntu/oci-monitor/tg_relay.py
+Restart=always
+RestartSec=5
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target

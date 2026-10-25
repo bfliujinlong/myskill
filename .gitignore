@@ -1,0 +1,58 @@
+# Hermes 仓库忽略项 —— 防止凭证/缓存被上传
+
+# 真实凭证目录（含 API key / 私钥）
+credentials/
+
+# 缓存/临时
+cache/
+blocked-scripts/
+
+# skills hub 索引缓存（本地生成，非源）
+skills/.hub/
+
+# curator 备份产物（60MB+ tar.gz，触发 GitHub GH001 拒收）
+skills/.curator_backups/
+
+# 运行时数据库
+*.db
+jobs.json
+.executions.db
+
+# 系统/Python
+__pycache__/
+*.pyc
+.env
+.env.*
+
+# 含真实密钥的文件（GitHub push protection 会拦截，一律排除）
+skills/**/*.env
+scripts/gemini_save_key.sh
+scripts/check_feishu_final.py
+scripts/feishu_delivery_test.py
+scripts/check_feishu_status.py
+scripts/check_feishu_status_v2.py
+scripts/check_feishu_status_v3.py
+scripts/feishu_workspace_check.py
+scripts/feishu_bot_info.py
+scripts/diagnose_feishu.py
+
+# 嵌套 git 仓库（外部 clone 的，不是本仓库资产）
+alibabacloud-aiops-skills/
+hermes-agent/
+
+# 大目录/生成物
+install/
+deploy/
+node_modules/
+plugins/
+.local/
+logs/
+sessions/
+
+# 备份文件(可能含脱敏前的真实密钥)
+*.bak
+*.bak-*
+skills/.archive/
+skills/.bundled_manifest
+skills/.usage.json
+skills/.locks/

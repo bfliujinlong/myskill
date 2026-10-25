@@ -1,0 +1,75 @@
+general_settings:
+  allow_requests_without_auth: true
+  proxy_hooks: /home/ubuntu/.hermes/deploy/litellm_hooks.py
+  telemetry: false
+  health_check: true
+  health_check_interval: 120
+
+model_list:
+  # ===== 同一 model_name "hy3" 对应多个免费 deployment =====
+  # 顺序按实测质量从高到低排 (solar-pro4 > laguna-s > stepfun > meituan > hy3)
+  # usage-based-routing 会按延迟/成功率动态选最优, 自然偏向高质量且快的
+  - model_name: hy3
+    litellm_params:
+      model: openai/upstage/solar-pro4:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+  - model_name: hy3
+    litellm_params:
+      model: openai/poolside/laguna-s-2.1:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+  - model_name: hy3
+    litellm_params:
+      model: openai/stepfun/step-3.7-flash:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+  - model_name: hy3
+    litellm_params:
+      model: openai/meituan/longcat-2.0:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+  - model_name: hy3
+    litellm_params:
+      model: openai/tencent/hy3:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+  # ===== Azure gpt-5-mini 兜底 (难任务, 单独 model_name 供显式指定) =====
+  - model_name: azure-gpt5mini
+    litellm_params:
+      model: azure/gpt-5-mini
+      api_base: https://liujl-9958-resource.openai.azure.com/
+      api_version: 2025-04-01-preview
+      api_key: os.environ/AZURE_OPENAI_API_KEY
+      deployment_name: gpt-5-mini
+      reasoning_effort: low
+  # ===== 常见模型名别名 (Codex 可能切到这些, 映射到免费/azure) =====
+  - model_name: gpt-5.2
+    litellm_params:
+      model: openai/upstage/solar-pro4:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+  - model_name: gpt-5.1
+    litellm_params:
+      model: openai/poolside/laguna-s-2.1:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+  - model_name: gpt-5
+    litellm_params:
+      model: openai/stepfun/step-3.7-flash:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/meituan/longcat-2.0:free
+      api_base: https://inference-api.nousresearch.com/v1
+      api_key: os.environ/NOUS_API_KEY
+
+router_settings:
+  drop_params: true
+  # 按延迟/成功率动态选最优 deployment (偏向高质量且响应快的)
+  routing_strategy: "usage-based-routing"
+  # 定期健康探测, 挂掉的自动降权/剔除, 恢复后加回
+  num_retries: 3
+  timeout: 60
+  retry_policy: {"Retry-After": 1}

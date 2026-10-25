@@ -1,0 +1,11 @@
+[Unit]
+Description=Codex tool-filter proxy (strips namespace tool -> litellm :4100)
+After=codex-free-proxy.service
+
+[Service]
+ExecStart=/home/ubuntu/.hermes/hermes-install/venv/bin/python3 /home/ubuntu/.hermes/deploy/codex_tool_filter.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

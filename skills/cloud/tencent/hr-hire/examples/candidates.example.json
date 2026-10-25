@@ -1,0 +1,31 @@
+{
+  "position": "高级数据开发工程师（P6）",
+  "rubric": [
+    {"name":"硬性门槛","weight":30,"gate":true},
+    {"name":"经验匹配","weight":25},
+    {"name":"技能深度","weight":20},
+    {"name":"项目复杂度","weight":15},
+    {"name":"稳定性","weight":10}
+  ],
+  "candidates": [
+    {"name":"候选人A","source":"内推","gate_pass":true,
+     "scores":[{"name":"硬性门槛","score":30,"evidence":"本科计算机；6年"},
+               {"name":"经验匹配","score":18,"evidence":"2个跨云迁移项目"},
+               {"name":"技能深度","score":15,"evidence":"精通Spark/Trino"},
+               {"name":"项目复杂度","score":10,"evidence":"负责实施"},
+               {"name":"稳定性","score":5,"evidence":"5年3段，1段8个月"}],
+     "concerns":["2024-03至2024-10空档期"]},
+    {"name":"候选人B","source":"猎头","gate_pass":false,"gate_note":"无跨云迁移经验，不满足必备项",
+     "scores":[{"name":"硬性门槛","score":0,"evidence":"缺失迁移经验"},
+               {"name":"经验匹配","score":12,"evidence":"5年数仓开发"},
+               {"name":"技能深度","score":16,"evidence":"Hive/Flink熟练"},
+               {"name":"项目复杂度","score":8,"evidence":"参与级"},
+               {"name":"稳定性","score":9,"evidence":"2段均超3年"}]},
+    {"name":"候选人C","source":"官网","gate_pass":true,
+     "scores":[{"name":"硬性门槛","score":30,"evidence":"硕士；8年"},
+               {"name":"经验匹配","score":22,"evidence":"PB级迁移主导"},
+               {"name":"技能深度","score":19,"evidence":"Spark/Flink/Trino全栈"},
+               {"name":"项目复杂度","score":14,"evidence":"方案负责人"},
+               {"name":"稳定性","score":4,"evidence":"近2年2段"}]}
+  ]
+}

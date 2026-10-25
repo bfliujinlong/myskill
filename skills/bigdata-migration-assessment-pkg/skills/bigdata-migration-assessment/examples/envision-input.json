@@ -1,0 +1,127 @@
+{
+  "project": "远景能源 AWS→腾讯云 多云适配（大数据部分）",
+  "source_cloud": "AWS",
+  "target_cloud": "腾讯云",
+  "phase_set": "v7",
+  "price_mode": "cost",
+  "model1_include_bandwidth": false,
+  "transfer_total_gb": 18858800,
+
+  "coefficients": {
+    "automation": 1.0,
+    "doc": 1.5,
+    "bandwidth": 1.2,
+    "compliance": 1.0,
+    "other": 1.0
+  },
+
+  "model1_units": [
+    {"id":"BD-GL-01","group":"伽利略VDL","name":"数据工厂","d1":5,"d2":5,"d3":4,"d4":5,"note":"Redshift数仓+4065条Spark ETL+1000+ECS Task+SQS/S3/ECR/RDS；迁移体量最大，异构改造"},
+    {"id":"BD-GL-02","group":"伽利略VDL","name":"数据中心","d1":4,"d2":5,"d3":4,"d4":5,"note":"Glue Catalog 9800表/Crawler/Spark + Athena + Lambda 实时计算，大数据组件最密集"},
+    {"id":"BD-GL-03","group":"伽利略VDL","name":"作业中心","d1":4,"d2":3,"d3":4,"d4":4,"note":"ECS Service/Task + Glue Workflow 编排 + Lambda + S3 + ECR + RDS"},
+    {"id":"BD-GL-04","group":"伽利略VDL","name":"分析中心","d1":3,"d2":4,"d3":3,"d4":5,"note":"Athena→DLC + Redshift→TCHouse 双重方言适配，查询接口全重构"},
+    {"id":"BD-GL-05","group":"伽利略VDL","name":"模型开发","d1":4,"d2":3,"d3":3,"d4":4,"note":"Fargate/Spot + GPU EC2 Autoscaling + ECS Capacity Provider + EFS"},
+    {"id":"BD-GL-06","group":"伽利略VDL","name":"VDM样机实时处理","d1":3,"d2":4,"d3":3,"d4":4,"note":"ECS Service ETL + SQS 实时消息，实时链路时延敏感"},
+    {"id":"BD-GL-07","group":"伽利略VDL","name":"云端告警计算","d1":2,"d2":4,"d3":3,"d4":4,"note":"Redshift 批量告警计算逻辑迁移与数仓适配"},
+    {"id":"BD-GL-08","group":"伽利略VDL","name":"数据运营","d1":2,"d2":3,"d3":3,"d4":3,"note":"Athena + Glue Spark 指标计算"},
+    {"id":"BD-GL-09","group":"伽利略VDL","name":"权限中心","d1":2,"d2":2,"d3":4,"d4":3,"note":"Athena+S3+RDS 权限模型与查询适配，IAM→CAM"},
+    {"id":"BD-GL-10","group":"伽利略VDL","name":"SDK","d1":2,"d2":2,"d3":5,"d4":4,"note":"封装 Athena/S3/SQS/SNS/Redshift/Lambda，影响所有依赖方，耦合度取5"},
+    {"id":"BD-GL-11","group":"伽利略VDL","name":"报表中心","d1":2,"d2":2,"d3":3,"d4":3,"note":"FineReport 部署与数据源适配"},
+    {"id":"BD-GL-12","group":"伽利略VDL","name":"消息中心","d1":2,"d2":2,"d3":4,"d4":4,"note":"SQS/SNS→TDMQ/CMQ，消息语义与 SDK 替换"},
+    {"id":"BD-GL-13","group":"伽利略VDL","name":"日志中心","d1":1,"d2":2,"d3":3,"d4":3,"note":"CloudWatch→CLS，采集与告警规则重建"},
+    {"id":"BD-GW-01","group":"格林威治","name":"大数据侧","d1":3,"d2":4,"d3":2,"d4":2,"note":"MongoDB 11实例(4TB×2+512GB×2) + S3 864TB；以 Rehost 为主"},
+    {"id":"BD-NM-01","group":"NEMO","name":"自建调度平台","d1":3,"d2":2,"d3":4,"d4":3,"note":"所有离线任务的调度依赖收口，耦合度高"}
+  ],
+
+  "model2_resources": [
+    {"item":"主机实例","qty":76,"unit":"台","note":"大数据相关 EC2"},
+    {"item":"容器POD","qty":1000,"unit":"个","note":"ECS Task/Service 折算"},
+    {"item":"镜像仓库","qty":28,"unit":"个","note":"ECR"},
+    {"item":"对象存储(按桶)","qty":20,"unit":"个","note":"S3 桶数"},
+    {"item":"中间件(按套)","qty":30,"unit":"套"},
+    {"item":"中间件(按量)","qty":3000,"unit":"GB"},
+    {"item":"数据库(按套)","qty":80,"unit":"套","note":"RDS 59 + 自建 31 中大数据相关部分"},
+    {"item":"数据库(按量)","qty":20000,"unit":"GB"},
+    {"item":"对象存储(按量)","qty":18858800,"unit":"GB","note":"S3 合计约 18858.8 TB —— 超目录计费上限"},
+    {"item":"存储迁移(非对象)","qty":316600,"unit":"GB","note":"EFS 合计约 316.6 TB —— 超目录计费上限"}
+  ],
+
+  "model2_alternatives": [
+    {"item":"对象存储 20PB — 迁移工具部署/配置/调优","man_days":10.25,"basis":"COS Migration / 专线通道搭建与限速调优，按批次"},
+    {"item":"对象存储 20PB — 传输期值守","man_days":12.8,"basis":"64 个传输日 × 值守系数 0.2"},
+    {"item":"EFS 316.6TB — 迁移工具与校验","man_days":3.0,"basis":"CFS 同步与一致性校验"}
+  ],
+
+  "bandwidth_scenarios": [
+    {"name":"S1 10Gbps/70%/18h","gbps":10,"eff":0.7,"hours":18},
+    {"name":"S2 10Gbps/70%/24h","gbps":10,"eff":0.7,"hours":24},
+    {"name":"S3 40Gbps/70%/24h","gbps":40,"eff":0.7,"hours":24},
+    {"name":"S4 100Gbps/70%/24h","gbps":100,"eff":0.7,"hours":24}
+  ],
+
+  "model3_items": [
+    {"category":"作业改造","item":"Glue Spark ETL 作业改造","qty":4065,"unit":"条","rate":48,"rate_unit":"条/人天","basis":"GlueContext/DynamicFrame 无对端，需重写为标准 Spark"},
+    {"category":"作业改造","item":"Spark Streaming 作业改造","qty":550,"unit":"条","rate":48,"rate_unit":"条/人天","basis":""},
+    {"category":"作业改造","item":"Python Shell 作业改造","qty":420,"unit":"条","rate":48,"rate_unit":"条/人天","basis":""},
+    {"category":"作业改造","item":"EMR Spark SQL 作业改造","qty":900,"unit":"条","rate":100,"rate_unit":"条/人天","basis":""},
+    {"category":"作业改造","item":"UDF 改造","qty":220,"unit":"个","rate":48,"rate_unit":"个/人天","basis":""},
+    {"category":"作业改造","item":"Python 任务改造","qty":520,"unit":"条","rate":48,"rate_unit":"条/人天","basis":""},
+    {"category":"作业改造","item":"Shell 任务改造","qty":375,"unit":"条","rate":100,"rate_unit":"条/人天","basis":""},
+    {"category":"作业改造","item":"增量变更作业","qty":200,"unit":"条","rate":48,"rate_unit":"条/人天","basis":""},
+    {"category":"实时链路","item":"Kinesis UDF → Flink","qty":30,"unit":"个","rate":16,"rate_unit":"个/人天","basis":""},
+    {"category":"实时链路","item":"Kinesis SQL 作业 → Oceanus","qty":150,"unit":"条","rate":8,"rate_unit":"条/人天","basis":"分片模型与消费位点语义不同"},
+    {"category":"实时链路","item":"Kinesis Jar 作业 → Flink","qty":30,"unit":"个","rate":8,"rate_unit":"个/人天","basis":""},
+    {"category":"元数据","item":"Glue Catalog 元数据迁移","qty":9800,"unit":"表","rate":2000,"rate_unit":"表/人天","fixed_md":5,"basis":"+5 人天工具适配"},
+    {"category":"元数据","item":"Redshift 表结构迁移","qty":2000,"unit":"表","rate":200,"rate_unit":"表/人天","basis":"分布键/排序键模型重设计"},
+    {"category":"元数据","item":"Athena 表结构迁移","qty":1500,"unit":"表","rate":200,"rate_unit":"表/人天","basis":""},
+    {"category":"SQL方言","item":"Redshift SQL 重写","qty":2000,"unit":"条","rate":100,"rate_unit":"条/人天","basis":"→ TCHouse 方言"},
+    {"category":"SQL方言","item":"Athena SQL 重写","qty":2200,"unit":"条","rate":100,"rate_unit":"条/人天","basis":"→ DLC 方言"},
+    {"category":"数据校验","item":"离线任务抽样校验","qty":4000,"unit":"条","rate":30,"rate_unit":"条/人天","basis":"20000 条任务 × 20% 抽样率"},
+    {"category":"数据校验","item":"Redshift 报表比对","qty":2000,"unit":"张","rate":150,"rate_unit":"张/人天","basis":""},
+    {"category":"数据校验","item":"Athena 报表比对","qty":1500,"unit":"张","rate":150,"rate_unit":"张/人天","basis":""},
+    {"category":"其他","item":"数仓性能调优","man_days":6.67,"basis":"TCHouse 分布键/索引/物化视图调优"},
+    {"category":"其他","item":"查询引擎性能调优","man_days":5.0,"basis":"DLC 引擎参数与缓存调优"},
+    {"category":"其他","item":"实时链路性能调优","man_days":1.0,"basis":""},
+    {"category":"其他","item":"HBase 迁移","man_days":5.0,"basis":""},
+    {"category":"其他","item":"迁移工具选型与适配","man_days":10.0,"basis":""},
+    {"category":"其他","item":"迁移脚本开发","man_days":20.0,"basis":""},
+    {"category":"其他","item":"大数据环境搭建","man_days":3.0,"basis":""},
+    {"category":"其他","item":"数据源配置","man_days":2.0,"basis":""},
+    {"category":"其他","item":"双跑并行支持","man_days":10.0,"basis":""},
+    {"category":"其他","item":"割接方案与执行支持","man_days":3.0,"basis":""}
+  ],
+
+  "comparisons": [
+    {"name":"我方现有报价 v1.2 大数据部分","man_days":198,"amount":"¥495,000",
+     "root_cause":"口径为 CK+Kafka+Hadoop 同构集群搬迁，实际为 AWS 托管大数据栈→腾讯云异构重构；且申明范围仅含格林/NEMO/Thunder，未含承载几乎全部体量的伽利略 VDL"},
+    {"name":"客户/腾讯侧数据湖评估","man_days":342.83,"amount":"—",
+     "root_cause":"表内 6 行任务数填 0 但备注载有真实分母，实际应为 461.06 人天；且未含 SQL 方言重写与一致性校验"}
+  ],
+
+  "levers": [
+    {"name":"文档系数","action":"开放源码仓库 + 提供现有架构文档","save_md":234.5,"save_amount":"约 ¥58 万（成本价）"},
+    {"name":"带宽系数","action":"提供 ≥40Gbps 专线并保证传输窗口","save_md":31.9,"save_amount":"并将搬迁日历工期由 341 天压缩至 64 天"},
+    {"name":"范围裁剪","action":"历史冷数据按时间窗裁剪或归档不迁","save_md":0,"save_amount":"按裁掉的 GB 量重算模型2"}
+  ],
+
+  "open_items": [
+    {"priority":"P0","item":"源码仓库访问权限（或明确不开放）","impact":"直接决定文档系数 1.0 / 1.5，影响模型1 全量 ±50%"},
+    {"priority":"P0","item":"现有架构文档与数据流图","impact":"无法验证模块边界与耦合度打分"},
+    {"priority":"P0","item":"完整作业清单（按引擎分类计数）","impact":"模型3 全部无法测算"},
+    {"priority":"P0","item":"元数据规模：表数/分区数/库数","impact":"元数据迁移与方言重写人天无法测算"},
+    {"priority":"P0","item":"各 S3 桶与 EFS 的实际容量及日增量","impact":"决定搬迁日历工期；20PB 量级下工期风险大于人力风险"},
+    {"priority":"P0","item":"专线带宽方案与可用传输窗口","impact":"日历工期可在 25.6 天与 341.5 天之间摆动"},
+    {"priority":"P0","item":"迁移范围清单：伽利略 VDL 是否在本次报价范围内","impact":"范围漏项是本次 6.9 倍差异的头号根因"},
+    {"priority":"P0","item":"责任矩阵逐项确认（代码改造/单测/版本发布/割接方案归属）","impact":"责任错位会让我方多背数百人天"},
+    {"priority":"P1","item":"是否允许保留 AWS 兼容层","impact":"决定彻底重构还是兼容适配"},
+    {"priority":"P1","item":"数据一致性验收标准与抽样率","impact":"校验人天可差 3 倍"},
+    {"priority":"P1","item":"双跑并行时长与双端成本承担方","impact":"双跑是隐性大项"},
+    {"priority":"P1","item":"割接窗口与是否允许分批割接","impact":"决定割接方案复杂度"},
+    {"priority":"P1","item":"合规要求：等保级别/数据是否可出域","impact":"决定合规系数 1.0 / 1.3"},
+    {"priority":"P1","item":"GPU 与弹性伸缩工作负载的实际使用模式","impact":"腾讯云无等价托管能力，需定制方案"},
+    {"priority":"P2","item":"历史数据是否可按时间窗裁剪","impact":"可能大幅降低搬迁量与工期"},
+    {"priority":"P2","item":"冷数据归档策略","impact":"同上"},
+    {"priority":"P2","item":"现有监控告警规则清单","impact":"影响日志/监控重建人天"},
+    {"priority":"P2","item":"权限模型现状（角色数/策略数）","impact":"影响 IAM→CAM 人天"}
+  ]
+}
