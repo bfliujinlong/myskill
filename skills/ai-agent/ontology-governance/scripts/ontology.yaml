@@ -1,0 +1,76 @@
+# Plan B — 最小化行业本体（单人 OPC 可跑的轻量版，非 Palantir Foundry）
+# 设计原则：对象模型 + 受控动作 + 人类在环 + 全链路审计
+meta:
+  version: 2026-11-01
+  owner: jinlongliu (OPC/FDE)
+  principle: 在现有 RBAC+工具路由(team-agent-binding) 之上，叠加 对象视图+动作治理
+
+# ── 1. 对象类型（本体节点）──────────────────────────────
+object_types:
+  SalesOpp:
+    desc: 销售机会 / 立项前
+    fields: [opp_id, customer, region, source_cloud, target_cloud, status]
+  MigrationProject:
+    desc: 迁移项目实例
+    fields: [proj_id, name, scope, source_scale, target_arch, status]
+    edges: {belongs_to: SalesOpp}
+  Quote:
+    desc: 报价单
+    fields: [quote_id, proj_id, total_usd, lines, version, state]
+    edges: {generated_from: MigrationProject, approved_by: User}
+    state_machine: [draft, pending_approval, approved, rejected]
+  SOW:
+    desc: 工作说明书
+    fields: [sow_id, proj_id, chapters, version, state]
+    edges: {generated_from: Quote, approved_by: User}
+    state_machine: [draft, pending_approval, approved, rejected]
+  CutoverPlan:
+    desc: 割接方案（高危）
+    fields: [plan_id, proj_id, waves, risk_gates]
+    edges: {generated_from: MigrationProject}
+    state_machine: [draft, pending_approval, approved, rejected]
+  Risk:
+    desc: 风险项
+    fields: [risk_id, proj_id, level, desc, mitigation]
+    edges: {belongs_to: MigrationProject}
+
+# ── 2. 受控动作（原 skill 升级成 Action，带治理字段）────
+# human_approval: required = 必须人批才落盘；none = 可直接执行（只读/草案类）
+actions:
+  GenerateQuote:
+    input: MigrationProject
+    output: Quote
+    human_approval: required
+    rollback: true
+    note: 报价是高风险对外产物，强制人批
+  GenerateSOW:
+    input: Quote
+    output: SOW
+    human_approval: required
+    rollback: true
+    note: 基于已批报价生成，再独立人批
+  DraftCutoverPlan:
+    input: MigrationProject
+    output: CutoverPlan
+    human_approval: required
+    rollback: true
+    note: 割接=生产变更，最强把关
+  RecordRisk:
+    input: MigrationProject
+    output: Risk
+    human_approval: none
+    rollback: false
+    note: 记录类动作，无需人批
+  Approve:
+    input: [Quote, SOW, CutoverPlan]
+    output: state->approved
+    human_approval: none
+    rollback: true
+    note: 由人类主体调用，代表审批通过
+
+# ── 3. 人类在环角色 ───────────────────────────────────
+users:
+  jinlongliu:
+    role: OPC/PM/售前 三合一
+    can_approve: [Quote, SOW, CutoverPlan]
+    can_propose: [GenerateQuote, GenerateSOW, DraftCutoverPlan, RecordRisk]

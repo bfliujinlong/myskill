@@ -1,0 +1,12 @@
+{
+  "project_id": "SANDBOX-BUILD-001",
+  "customer_name": "测试客户",
+  "opportunity_name": "Landing Zone 测试机会",
+  "opportunity_type": "new-bidding",
+  "engagement_type": "build-implementation",
+  "stage": "discovery",
+  "owner": "测试Owner",
+  "selected_offerings": ["Cloud Landing Zone"],
+  "language": "zh-CN",
+  "sensitivity": "internal-test"
+}

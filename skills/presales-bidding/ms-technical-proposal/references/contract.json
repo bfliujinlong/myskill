@@ -1,0 +1,96 @@
+{
+  "skill": "ms-technical-proposal",
+  "version": "0.1.0",
+  "purpose": "把 ms-service-solution 的六段工作稿 + 客户正式提交包转成对外投标技术方案书（分段生成章节 → 整合 → 四维自检）。",
+  "consumes": [
+    {
+      "artifact": "service-solution",
+      "from_skill": "ms-service-solution",
+      "path": "03_方案与应答/01_服务方案/01_共通设计/",
+      "required": true
+    },
+    {
+      "artifact": "submission-package",
+      "path": "03_方案与应答/05_客户正式提交包/",
+      "optional": true,
+      "note": "客户正式提交包为外部/人工前置产物，无上游 skill 产出；已放入则读取（Service Catalog / SLA 表 / 团队画像 / 交接清单 / 报告清单）作为佐证源，未放入 → WARN 待补充，不阻断分段生成"
+    },
+    {
+      "artifact": "company_intro",
+      "kb_key": "company_intro",
+      "optional": true
+    },
+    {
+      "artifact": "bid_chapters",
+      "kb_key": "bid_chapters",
+      "optional": true
+    },
+    {
+      "artifact": "architecture_images",
+      "kb_key": "architecture_images",
+      "optional": true
+    },
+    {
+      "artifact": "case_index",
+      "kb_key": "case_index",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "artifact": "technical-proposal-chapters",
+      "path": "03_方案与应答/01_服务方案/技术方案/[项目]/"
+    },
+    {
+      "artifact": "technical-proposal",
+      "path": "03_方案与应答/01_服务方案/对外技术方案书-[项目]-v1.0.md"
+    }
+  ],
+  "boundaries": [
+    "数字只从客户直源或待商务确认取，禁止新造",
+    "丰满=已确证事实的展开度，展开不引入无源数字",
+    "案例两段式（脱敏事实 + 不构成本项目承诺）",
+    "图只画已锚定条目与已确证数字",
+    "内部痕迹（纠错史/内部代号/KB路径）不外泄",
+    "只写内容不写格式（格式归下游格式化环节）",
+    "不改上游 service-solution 结论，冲突回上游",
+    "不写报价/SOW 内容"
+  ],
+  "inputs": {
+    "required": [
+      {
+        "name": "project.yaml",
+        "location": "项目根",
+        "on_missing": "BLOCKED: 当前目录不是已初始化的 PCS Project"
+      },
+      {
+        "name": "service-solution 工作稿",
+        "location": "03_方案与应答/01_服务方案/01_共通设计/",
+        "on_missing": "BLOCKED: 未找到服务方案工作稿，技术方案书需以范围锚定结论为基准"
+      }
+    ],
+    "optional": [
+      {
+        "name": "客户正式提交包",
+        "location": "03_方案与应答/05_客户正式提交包/",
+        "on_missing": "WARN: 未找到客户正式提交包（外部/人工前置产物），相关佐证标注'待补充'，不阻断分段生成"
+      }
+    ]
+  },
+  "qa": {
+    "granularity_contract": {
+      "定义": "丰满=已确证事实的展开度（可度量），不是新数字堆砌或页数",
+      "展开动作": "确证事实展开为 What→Why→How→Who→When，不并列更多 bullet",
+      "禁止": ["为篇幅加节", "加无源数字", "案例整包搬运", "母版全量抄入", "佐证改写成承诺"],
+      "读契约时机": "产出前读 output-template 丰满度底线；产出后过 merge_chapters 卡尺"
+    },
+    "coverage_gate": {
+      "mapping_ratio": "x/N 应趋近 1（映射提及≥1，缺则 GATE-FAIL）",
+      "evidence_ratio": "y/N 记录缺口及原因（有接管/同类域须≥1 两段式佐证）",
+      "traceability_ratio": "z/R 应为 1（--rfp-count R 下 z<R 即 GATE-FAIL）",
+      "narrative_completeness": "01-09 每章≥1 处 How 流程，缺章 GATE-FAIL",
+      "diagram_coverage": "组织架构/告警链路/交接时间轴",
+      "enforcement": "对外交付前 merge_chapters.py --strict [--rfp-count R]，任一维度 GATE-FAIL → exit 2 BLOCK，回补后重跑，不静默通过"
+    }
+  }
+}

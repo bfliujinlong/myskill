@@ -166,6 +166,31 @@ and put the activation URL + the one human action needed in the report. Do not s
 and do not phrase a repeat failure as a new incident. If the user has not acted on the URL after several
 runs, say plainly that the job cannot do its job until they do, rather than generating another full report.
 
+### 5c. Degraded mode: when billing is blocked, measure the host itself (added 2026-10-28)
+
+Do NOT report "still blocked" and stop. The monitored host **is** the GCP free-tier VM, so real quota
+consumption is readable locally without any GCP API. `gcp-billing-monitor.py` now auto-falls back to
+`check_host_quotas()` whenever the real cost is unavailable (status != success OR cost is None):
+
+| Signal | Local source | Free-tier limit |
+|---|---|---|
+| zone / machine type | metadata server `instance/zone`, `instance/machine-type` | e2-micro, us-west1/us-central1/us-east1 |
+| preemptible | `instance/scheduling/preemptible` | must be FALSE |
+| persistent disk | `lsblk -bd -o SIZE,TYPE,MODEL` (sum of PersistentDisk) | 30 GB |
+| egress | `/sys/class/net/<iface>/statistics/tx_bytes`, **exclude `lo`** | 1 GiB/month |
+| uptime | `/proc/uptime` → extrapolate tx to 30 days | — |
+
+Important honesty caveat: the `tx_bytes` counter includes **intra-zone private traffic**, which is free.
+It is an upper bound, NOT billable egress. Always print that caveat in the report — do not present
+3.5 GiB as "you owe for 2.5 GiB".
+
+Excluding `lo` matters: on this host `lo` alone adds ~0.96 GiB, ~28% of the total. Counting it would
+manufacture a false over-quota alert.
+
+Known-good baseline (2026-10-28, host `free-ubuntu-vm`): us-central1-f, e2-micro, preemptible FALSE,
+30.0 GB PD, 3.38 GiB tx over 28.8 days → 3.52 GiB/mo extrapolated. Region/machine/disk all compliant;
+only the egress upper bound trips the 1 GiB threshold.
+
 ### 6. SMS channel is not configured — do not claim it sent
 
 `gcp-billing-monitor.py` reads `SMS_GATEWAY_URL` / `TWILIO_*`; neither exists in `~/.hermes/.env`.

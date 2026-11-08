@@ -1,0 +1,18 @@
+{
+  "brand": "tencent",
+  "name_cn": "腾讯云",
+  "label": "腾讯蓝",
+  "primary": "3370FF",
+  "accent": "0052D9",
+  "text": "222222",
+  "muted": "646A73",
+  "heading": "3370FF",
+  "table_shade": "3370FF",
+  "table_shade_text": "FFFFFF",
+  "rule": "222222",
+  "font_cn": "宋体",
+  "font_head_cn": "黑体",
+  "font_en": "Calibri",
+  "evidence": "腾讯云-上云迁移题库-汇总版.docx: 3370FF x3, 646A73",
+  "note": "腾讯品牌蓝 3370FF；禁用拳头游戏项目色 FF0000/181818（客户项目色，非厂家色）"
+}

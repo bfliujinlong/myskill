@@ -1,0 +1,18 @@
+{
+  "brand": "alibaba",
+  "name_cn": "阿里云",
+  "label": "阿里橙",
+  "primary": "FF6A00",
+  "accent": "F79646",
+  "text": "222222",
+  "muted": "555555",
+  "heading": "FF6A00",
+  "table_shade": "FF6A00",
+  "table_shade_text": "FFFFFF",
+  "rule": "222222",
+  "font_cn": "宋体",
+  "font_head_cn": "黑体",
+  "font_en": "Calibri",
+  "evidence": "AIOPS_报价单_阿里橙.docx: FF6A00 x6, 222222, FFFFFF, 555555; theme 含 F79646/4BACC6",
+  "note": "主色橙用于 H1/H2 标题与表头底；正文保持 222222 保证可读性"
+}

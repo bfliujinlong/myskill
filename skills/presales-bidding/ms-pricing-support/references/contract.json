@@ -1,0 +1,102 @@
+{
+  "skill": "ms-pricing-support",
+  "version": "0.1.0-rc.8",
+  "purpose": "基于服务方案范围与显式报价参数，通过确定性脚本计算生成报价测算表（PREVIEW 优先）。金额永不推断。",
+  "consumes": [
+    {
+      "artifact": "pricing-parameters",
+      "from_skill": "external-input",
+      "path": "examples/pricing-input.json"
+    },
+    {
+      "artifact": "service-solution",
+      "from_skill": "ms-service-solution",
+      "path": "03_方案与应答/01_服务方案/01_共通设计/",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "artifact": "pricing-estimate",
+      "path": "04_商务与合同/01_报价与测算/",
+      "statuses": [
+        "PREVIEW",
+        "CREATED",
+        "BLOCKED"
+      ]
+    }
+  ],
+  "boundaries": [
+    "所有数字必须来自显式输入参数，脚本强制校验",
+    "缺数字或非数值时非零退出且不产出",
+    "不推断单价、不套用默认价目、不引入模型估算",
+    "Agent 不批准价格、不对外发送",
+    "不写入 Company KB",
+    "默认 PREVIEW，不覆盖同名文件"
+  ],
+  "inputs": {
+    "required": [
+      {
+        "name": "project.yaml",
+        "location": "项目根",
+        "on_missing": "BLOCKED: 当前目录不是已初始化的 PCS Project，未找到 project.yaml"
+      },
+      {
+        "name": "显式报价参数 JSON",
+        "location": "examples/pricing-input.json（或用户提供）",
+        "on_missing": "BLOCKED: 报价参数不完整，缺失显式数字，无法测算"
+      }
+    ],
+    "upstream_optional": [
+      {
+        "name": "服务方案",
+        "from_skill": "ms-service-solution",
+        "location": "03_方案与应答/01_服务方案/01_共通设计/",
+        "use": "确定计量对象集合与范围（范围守恒基准）",
+        "on_missing": "提示并继续，报价范围以显式参数为准，标注缺服务方案对照"
+      }
+    ]
+  },
+  "output": {
+    "mode_default": "PREVIEW",
+    "on_save": {
+      "dir": "04_商务与合同/01_报价与测算/",
+      "filename": "YYYY-MM-DD-{客户}-报价测算.md",
+      "guards": [
+        "客户名称明确，否则 BLOCKED",
+        "脚本已成功计算（退出码 0），否则 BLOCKED: 报价参数不完整",
+        "目标目录存在，否则 BLOCKED: 请先运行 ms-project-init",
+        "目标文件不存在，否则 BLOCKED: 不覆盖"
+      ]
+    },
+    "references": {
+      "framework": "references/output-template.md（普适框架，表结构+确定性纪律+数量三分，零客户硬编码）",
+      "adaptation": "references/adaptation-points.md（参数化适配点清单，调整报价形态而非金额，运行时按上游选档）",
+      "example": "references/reference-example.md（参考实例，reference-only，运行时默认不加载、不照抄）"
+    }
+  },
+  "runtime_flow": [
+    "步骤0 前置检查：project.yaml",
+    "步骤0.5 上游加载：显式报价参数 JSON（必需）+ 服务方案范围（可选，作范围守恒对照）",
+    "步骤0.6 上游一致性检查：报价计量对象与服务方案范围冲突时 BLOCKED，不静默修正",
+    "步骤1 适配选档：读 adaptation-points.md，对报价形态各适配点（计费模式/费率结构/币种/税/折扣/计量对象）识别客户诉求→选档→挂上游依据；确定性与数量三分纪律不参与适配",
+    "步骤2 确定性计算：运行 compute_pricing.py，退出码非0则 BLOCKED，不手工凑数",
+    "步骤3 框架填充：用 output-template.md 表结构，占位符替换为脚本输出+选档值",
+    "步骤4 PREVIEW 输出：需示范时参照 reference-example.md，只借结构不抄值"
+  ],
+  "disciplines": [
+    "确定性报价：所有金额来自显式输入+compute_pricing.py，不推断单价、不套默认价目、不引模型估算",
+    "缺参数即 BLOCKED：脚本退出码非0时不产出，不手工凑数",
+    "数量基线三分：Baseline/pricing_basis/客户确认三者始终区分，报价数不升级为确认数",
+    "范围守恒：报价计量对象不超过服务方案 In Scope 范围",
+    "上游一致性检查：报价数量与方案数量冲突时保留差异并 BLOCKED，不抹平",
+    "只读 KB：严禁写入 /shared/pcs-presales/",
+    "不批价、不外发：Agent 不批准价格、不对外发送、不写入 Company KB"
+  ],
+  "status_declaration": [
+    "PREVIEW",
+    "CREATED: <路径>",
+    "UPDATED: <路径>",
+    "BLOCKED: <原因>"
+  ]
+}

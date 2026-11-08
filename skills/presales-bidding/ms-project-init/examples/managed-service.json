@@ -1,0 +1,12 @@
+{
+  "project_id": "SANDBOX-MS-001",
+  "customer_name": "测试客户",
+  "opportunity_name": "Managed Service 测试机会",
+  "opportunity_type": "new-bidding",
+  "engagement_type": "managed-service",
+  "stage": "discovery",
+  "owner": "测试Owner",
+  "selected_offerings": ["SmartCare for Cloud"],
+  "language": "zh-CN",
+  "sensitivity": "internal-test"
+}

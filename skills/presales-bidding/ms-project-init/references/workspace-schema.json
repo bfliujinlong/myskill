@@ -1,0 +1,109 @@
+{
+  "schema_version": "0.1.0",
+  "company_kb_default_path": "_shared/company-knowledge",
+  "common_rules": {
+    "batching": "整包材料保留原层级，按日期与轮次建立批次目录，批次根目录记录来源、正式性、敏感性和版本关系。",
+    "versioning": "原始文件不覆盖；工作稿、待评审、已批准、已发布和已替代版本必须可区分。",
+    "default_permissions": "项目成员按 Workspace 权限协作；Agent 可生成到待评审，不得自行批准、发布或修改 Company KB。"
+  },
+  "base_directories": [
+    {"path":"00_项目管理","title":"项目管理","purpose":"维护项目身份、治理、协同和状态。","store":"项目基本信息、权限、计划、决策、风险和版本记录。","exclude":"客户原始材料、方案正文和正式提交包。","stage":"全阶段","skills":"project-init、project-inspect、presales-handover","permissions":"Project Owner 负责；成员按授权协作。"},
+    {"path":"00_项目管理/01_项目信息与权限","title":"项目信息与权限","purpose":"保存项目身份和访问边界。","store":"项目编码、Owner、成员、角色、敏感级别和授权记录。","exclude":"密码、Token、客户业务正文。","stage":"初始化及变更时","skills":"project-init、project-inspect","permissions":"Project Owner 维护；Agent 仅整理待确认信息。"},
+    {"path":"00_项目管理/02_计划与协同","title":"计划与协同","purpose":"组织里程碑、任务和跨团队协作。","store":"计划、会议节奏、任务分工、截止时间和依赖。","exclude":"正式合同承诺和未经确认的客户要求。","stage":"全阶段","skills":"rfp-analyze、presales-handover","permissions":"Project Owner 与 Contributor 可维护。"},
+    {"path":"00_项目管理/03_决策风险与问题","title":"决策风险与问题","purpose":"记录决策、假设、风险和开放问题。","store":"决策日志、风险登记、问题清单、假设和依赖。","exclude":"无来源的事实断言和已废弃但未标记的结论。","stage":"全阶段","skills":"service-solution、solution-review","permissions":"Agent 可整理；Owner 确认决策。"},
+    {"path":"00_项目管理/04_项目状态与版本","title":"项目状态与版本","purpose":"维护阶段、工件状态和初始化检查。","store":"阶段状态、版本索引、初始化报告和变更记录。","exclude":"客户原始包和业务工件正文。","stage":"全阶段","skills":"project-init、project-inspect、external-release-check","permissions":"Agent 可检查；Owner 批准阶段变更。"},
+
+    {"path":"01_客户输入","title":"客户输入","purpose":"保存客户和采购方提供的原始证据。","store":"RFP、客户资料、会议沟通、澄清和调研参考。","exclude":"我方分析结论和未经授权的公司知识副本。","stage":"发现到提交","skills":"artifact-index、rfp-analyze","permissions":"原始文件不覆盖；敏感材料按项目权限读取。"},
+    {"path":"01_客户输入/01_RFP与采购文件","title":"RFP与采购文件","purpose":"保存采购流程中的正式原始包。","store":"RFP正文、附件、评分表、商务模板和安全问卷。","exclude":"我方应答稿、拆解结果和改写后的客户文件。","stage":"需求与应标","skills":"artifact-index、rfp-analyze","permissions":"原始包只追加版本，不覆盖。"},
+    {"path":"01_客户输入/02_客户提供资料","title":"客户提供资料","purpose":"保存客户主动提供的业务和技术资料。","store":"架构、清单、现状报告、规范和数据样例。","exclude":"我方方案和未获授权的外部资料。","stage":"发现与方案","skills":"artifact-index、service-solution-build","permissions":"按敏感性最小授权。"},
+    {"path":"01_客户输入/03_会议访谈与沟通","title":"会议访谈与沟通","purpose":"保存会议、访谈和日常沟通证据。","store":"妙记、纪要、录音链接、邮件和沟通摘要。","exclude":"把未确认口头表述直接写成正式承诺。","stage":"全阶段","skills":"rfp-analyze、artifact-index","permissions":"参与者和 Project Owner 可维护。"},
+    {"path":"01_客户输入/04_澄清与正式回复","title":"澄清与正式回复","purpose":"保存双向澄清及其正式状态。","store":"问题清单、客户答复、我方正式澄清和版本记录。","exclude":"尚未批准却标记为正式的回复。","stage":"应标与商务","skills":"rfp-analyze、external-release-check","permissions":"正式回复必须经 Owner 审核。"},
+    {"path":"01_客户输入/05_项目调研与参考","title":"项目调研与参考","purpose":"保存仅服务当前机会的外部调研。","store":"行业、客户、竞争和技术参考及来源链接。","exclude":"无来源转载和自动晋升的公司知识。","stage":"发现与策略","skills":"rfp-analyze、service-solution","permissions":"Agent 可整理并标注来源与时效。"},
+
+    {"path":"02_机会与策略","title":"机会与策略","purpose":"形成客户理解、竞争判断和应标策略。","store":"需求、机会、竞争、相关方、策略和证据规划。","exclude":"客户原始包和正式提交文件。","stage":"发现到方案","skills":"rfp-analyze、service-solution","permissions":"Agent 生成工作稿；Bid Owner 定案。"},
+    {"path":"02_机会与策略/01_客户现状与需求","title":"客户现状与需求","purpose":"形成有来源的客户现状和需求视图。","store":"现状、问题、目标、约束、需求和证据索引。","exclude":"公司能力描述和未经证实的客户判断。","stage":"发现与需求","skills":"rfp-analyze","permissions":"事实需可追溯；假设显性标记。"},
+    {"path":"02_机会与策略/02_机会与竞争判断","title":"机会与竞争判断","purpose":"判断机会质量、竞争态势和赢单条件。","store":"机会判断、竞品、替代方案、优势与风险。","exclude":"把外部观点直接写成公司事实。","stage":"机会判断","skills":"service-solution","permissions":"Bid Owner 对关键结论负责。"},
+    {"path":"02_机会与策略/03_应标策略","title":"应标策略","purpose":"形成一页纸作战逻辑和应答主线。","store":"赢单主题、重点场景、差异化、取舍和行动。","exclude":"未经审批的价格和履约承诺。","stage":"策略与方案","skills":"service-solution","permissions":"Agent 起草；Bid Owner 确认。"},
+    {"path":"02_机会与策略/04_相关方与决策链","title":"相关方与决策链","purpose":"识别项目角色、影响力和决策路径。","store":"相关方、角色、诉求、影响和沟通计划。","exclude":"不必要的个人敏感信息。","stage":"全阶段","skills":"rfp-analyze、service-solution","permissions":"严格按项目敏感级别访问。"},
+    {"path":"02_机会与策略/05_素材与证据规划","title":"素材与证据规划","purpose":"规划主张需要的公司证据和项目证据。","store":"证据需求、已有资产、缺口、Owner 和截止时间。","exclude":"未经审核直接对外的 Sample。","stage":"策略与方案","skills":"evidence-select、external-release-check","permissions":"证据外发前必须检查敏感性和授权。"},
+
+    {"path":"03_方案与应答","title":"方案与应答","purpose":"承载服务设计、RFP应答、汇报和提交包。","store":"服务方案、应答矩阵、演示、附件和正式提交包。","exclude":"报价底稿、合同原件和客户原始包。","stage":"方案到提交","skills":"service-solution-build、rfp-response-build","permissions":"工作稿可协作；正式提交受发布 Gate。"},
+    {"path":"03_方案与应答/01_服务方案","title":"服务方案","purpose":"组织共通设计和项目类型模块。","store":"方案结构、责任模型、架构、流程和保障设计。","exclude":"未确认客户事实和未经审批的商业承诺。","stage":"方案设计","skills":"service-solution-build、solution-review","permissions":"Agent 起草；专业 Reviewer 审核。"},
+    {"path":"03_方案与应答/01_服务方案/01_共通设计","title":"共通设计","purpose":"保存跨服务类型复用的项目设计。","store":"设计原则、总体架构、治理、RACI和集成关系。","exclude":"某单一模块的详细执行内容。","stage":"方案设计","skills":"service-solution-build","permissions":"与 Company KB 冲突时以公司权威知识为准。"},
+    {"path":"03_方案与应答/01_服务方案/02_项目类型模块","title":"项目类型模块","purpose":"按 Engagement Type 承载差异化服务设计。","store":"Managed Service、Build、Consulting或Hybrid模块。","exclude":"与当前项目类型无关的空模块。","stage":"方案设计","skills":"service-solution-build","permissions":"由 project-init 按显式项目类型创建。"},
+    {"path":"03_方案与应答/02_RFP应答与总控","title":"RFP应答与总控","purpose":"管理需求、评分与应答覆盖。","store":"Compliance Matrix、应答稿、责任分工和缺口。","exclude":"客户原始RFP和最终锁定提交包。","stage":"应标","skills":"rfp-analyze、rfp-response-build","permissions":"关键偏离必须由 Bid Owner 确认。"},
+    {"path":"03_方案与应答/03_汇报与演示材料","title":"汇报与演示材料","purpose":"准备内部和客户汇报材料。","store":"PPT、讲稿、Demo说明和演示版本。","exclude":"默认POC和未经批准的正式外发版。","stage":"方案与汇报","skills":"presentation-build、external-release-check","permissions":"正式外发前进入发布 Gate。"},
+    {"path":"03_方案与应答/04_附件与支撑材料","title":"附件与支撑材料","purpose":"集中管理方案引用的支撑附件。","store":"资质、案例、架构、人员履历和已授权Sample。","exclude":"未脱敏客户材料和无授权资产。","stage":"方案与提交","skills":"evidence-select、external-release-check","permissions":"外发权限逐项核验。"},
+    {"path":"03_方案与应答/05_客户正式提交包","title":"客户正式提交包","purpose":"保存已批准并实际提交的不可混淆版本。","store":"正式提交包、清单、提交时间、对象和回执。","exclude":"工作稿、内部批注和未批准文件。","stage":"正式提交","skills":"external-release-check","permissions":"仅经批准后写入 released 工件。"},
+
+    {"path":"04_商务与合同","title":"商务与合同","purpose":"承载报价、SOW、条款和承诺控制。","store":"报价、测算、审批、SOW、合同和变更记录。","exclude":"客户原始采购包和方案附件。","stage":"商务与签约","skills":"pricing-support、sow-support、cross-document-consistency","permissions":"商业、履约和法律承诺受硬门禁。"},
+    {"path":"04_商务与合同/01_报价与测算","title":"报价与测算","purpose":"管理服务成本、价格和版本。","store":"测算底稿、价格版本、假设、折扣和审批索引。","exclude":"未经批准即对外的报价。","stage":"商务","skills":"pricing-support","permissions":"限授权成员；Agent 不得批准价格。"},
+    {"path":"04_商务与合同/02_商务沟通与审批","title":"商务沟通与审批","purpose":"记录商务协商和内部审批。","store":"审批记录、谈判要点、例外和决策。","exclude":"仅口头存在却标记为正式的价格承诺。","stage":"商务","skills":"pricing-support、external-release-check","permissions":"审批人和 Bid Owner 负责。"},
+    {"path":"04_商务与合同/03_Service-Catalog与SOW","title":"Service Catalog与SOW","purpose":"定义项目服务范围、活动、产出和责任。","store":"服务目录映射、SOW工作稿、范围和排除项。","exclude":"超出公司 Offering 的未批准承诺。","stage":"方案到签约","skills":"sow-support、cross-document-consistency","permissions":"Offering与交付Owner审核。"},
+    {"path":"04_商务与合同/04_合同与条款","title":"合同与条款","purpose":"保存合同草案、条款审阅和正式版本。","store":"合同、附件、条款红线和法务意见。","exclude":"无关内部资料和未授权副本。","stage":"签约","skills":"cross-document-consistency","permissions":"法务与授权审批人负责。"},
+    {"path":"04_商务与合同/05_承诺与变更记录","title":"承诺与变更记录","purpose":"建立跨文件承诺和变更追踪。","store":"范围、SLA、RACI、Exclusion、价格和特殊承诺变更。","exclude":"未核实的口头期待。","stage":"方案到移交","skills":"cross-document-consistency、presales-handover","permissions":"任何扩大承诺必须人工批准。"},
+
+    {"path":"05_评审与发布","title":"评审与发布","purpose":"组织专项评审、一致性检查和正式发布。","store":"评审意见、整改、批准、发布记录和回执。","exclude":"客户原始材料和未送审的日常工作稿。","stage":"评审与提交","skills":"solution-review、external-release-check","permissions":"Reviewer评审，Approver批准，Agent不自行放行。"},
+    {"path":"05_评审与发布/01_方案与技术评审","title":"方案与技术评审","purpose":"验证方案正确性、完整性和证据。","store":"评审清单、意见、整改和结论。","exclude":"交付、商务或法务评审的替代结论。","stage":"内部评审","skills":"solution-review","permissions":"专业Reviewer给出结论。"},
+    {"path":"05_评审与发布/02_交付可行性评审","title":"交付可行性评审","purpose":"验证资源、依赖、计划和交付可行性。","store":"资源评估、接管条件、依赖、风险和交付意见。","exclude":"未经交付Owner确认的可交付承诺。","stage":"内部评审","skills":"delivery-feasibility-review","permissions":"交付Owner负责。"},
+    {"path":"05_评审与发布/03_商务法务与安全评审","title":"商务法务与安全评审","purpose":"验证价格、条款、合规和安全边界。","store":"商务、法务、安全和合规评审记录。","exclude":"替代正式审批系统的自建批准记录。","stage":"内部评审","skills":"external-release-check","permissions":"对应Reviewer与Approver负责。"},
+    {"path":"05_评审与发布/04_跨文件一致性检查","title":"跨文件一致性检查","purpose":"检查方案、报价、SOW、SLA和合同一致性。","store":"差异报告、冲突清单、处理结论和残留风险。","exclude":"未经确认自动改写正式文件。","stage":"评审与签约","skills":"cross-document-consistency","permissions":"Agent 可检查；Owner 决定修订。"},
+    {"path":"05_评审与发布/05_发布与提交记录","title":"发布与提交记录","purpose":"记录发布对象、版本、批准和回执。","store":"发布清单、批准证据、提交时间、渠道和回执。","exclude":"未提交工作稿和无审批的外发。","stage":"正式发布","skills":"external-release-check","permissions":"硬门禁；只有授权人可正式发布。"},
+
+    {"path":"06_移交与复盘","title":"移交与复盘","purpose":"完成售前移交、结果记录、复盘和受控回流。","store":"移交、结果、反馈、复盘、候选和归档。","exclude":"未经审核直接晋升的公司知识。","stage":"签约后与结项","skills":"presales-handover、project-retrospective、knowledge-candidate","permissions":"移交和知识晋升均需人工确认。"},
+    {"path":"06_移交与复盘/01_售前移交","title":"售前移交","purpose":"向交付团队移交最终商业和服务事实。","store":"最终范围、SLA、责任、依赖、特殊承诺和接收确认。","exclude":"未签版本和未解决关键冲突。","stage":"签约后","skills":"presales-handover","permissions":"接收人确认前不得标记完成。"},
+    {"path":"06_移交与复盘/02_结果与客户反馈","title":"结果与客户反馈","purpose":"记录项目结果和客户反馈证据。","store":"中标结果、客户反馈、评分和后续机会。","exclude":"无来源归因和内部猜测。","stage":"结果后","skills":"project-retrospective","permissions":"Project Owner确认。"},
+    {"path":"06_移交与复盘/03_项目复盘","title":"项目复盘","purpose":"识别有效做法、失误、条件和代价。","store":"事实、判断、反方、代价、改进和责任。","exclude":"只写成功叙事或把项目特例当标准。","stage":"结项","skills":"project-retrospective","permissions":"团队参与；Owner定案。"},
+    {"path":"06_移交与复盘/04_知识与素材候选","title":"知识与素材候选","purpose":"承载尚未晋升的项目候选。","store":"公司知识、Skill、Sample和Adapter候选。","exclude":"正式公司知识副本和自动发布内容。","stage":"全阶段可识别，结项集中复核","skills":"knowledge-candidate","permissions":"Agent整理；Owner决定晋升。"},
+    {"path":"06_移交与复盘/04_知识与素材候选/公司知识候选","title":"公司知识候选","purpose":"保存可能进入C1-C6的知识候选。","store":"证据、适用边界、建议去向和审核人。","exclude":"具体客户身份和未脱敏原始材料。","stage":"复盘与持续改进","skills":"knowledge-candidate","permissions":"Knowledge Admin发布；Agent不得直写Company KB。"},
+    {"path":"06_移交与复盘/04_知识与素材候选/Skill改进候选","title":"Skill改进候选","purpose":"保存流程、检查和输出契约改进建议。","store":"问题、复现、建议、边界和测试场景。","exclude":"平台特有限制混入Core规则。","stage":"使用中与复盘","skills":"knowledge-candidate","permissions":"Skill Owner审核。"},
+    {"path":"06_移交与复盘/04_知识与素材候选/素材与Sample候选","title":"素材与Sample候选","purpose":"保存可能复用的证据与样例候选。","store":"候选包、来源、授权、脱敏和适用条件。","exclude":"未经授权对外材料。","stage":"复盘","skills":"evidence-select、knowledge-candidate","permissions":"Owner审核授权和敏感性。"},
+    {"path":"06_移交与复盘/04_知识与素材候选/平台适配问题","title":"平台适配问题","purpose":"记录Knodo等平台的兼容问题。","store":"复现步骤、平台版本、影响和Adapter建议。","exclude":"平台问题写入业务Core规则。","stage":"全阶段","skills":"project-inspect、knowledge-candidate","permissions":"Adapter Owner维护。"},
+    {"path":"06_移交与复盘/05_项目归档","title":"项目归档","purpose":"保存最终索引和归档清单。","store":"正式版本索引、保留策略、归档位置和访问说明。","exclude":"以复制代替正式原件链接。","stage":"结项","skills":"project-retrospective","permissions":"Project Owner确认归档范围。"}
+  ],
+  "engagement_modules": {
+    "managed-service": {
+      "label": "Managed Service",
+      "directories": [
+        {"path":"Managed-Service","title":"Managed Service","purpose":"组织持续运营型服务方案。","store":"范围、运营治理、SLA、接管和持续改进。","exclude":"一次性Build细节和默认POC。","stage":"方案设计","skills":"service-solution-build","permissions":"Offering与交付Owner审核。"},
+        {"path":"Managed-Service/服务范围与目录","title":"服务范围与目录","purpose":"定义服务项、边界和产出。","store":"服务目录、In/Out Scope、活动和交付物。","exclude":"未经批准的新增责任。","stage":"方案与SOW","skills":"service-solution-build、sow-support","permissions":"Offering Owner审核。"},
+        {"path":"Managed-Service/运营组织与治理","title":"运营组织与治理","purpose":"定义组织、RACI、会议和治理。","store":"组织模型、角色、RACI、治理节奏和升级机制。","exclude":"与实际资源不一致的承诺。","stage":"方案与移交","skills":"service-solution-build、presales-handover","permissions":"交付Owner审核。"},
+        {"path":"Managed-Service/SLA与运营保障","title":"SLA与运营保障","purpose":"定义指标、服务时间和保障边界。","store":"SLA、SLO、优先级、响应、恢复、Exclusion和Clock Suspension。","exclude":"未经批准的扩大SLA。","stage":"方案到合同","skills":"sow-support、cross-document-consistency","permissions":"商业履约硬门禁。"},
+        {"path":"Managed-Service/Mobilization与服务接管","title":"Mobilization与服务接管","purpose":"定义启动、接管和稳定化。","store":"准入条件、计划、知识转移、基线和退出标准。","exclude":"依赖未满足却承诺无条件接管。","stage":"方案与移交","skills":"service-solution-build、presales-handover","permissions":"交付Owner审核。"},
+        {"path":"Managed-Service/持续改进与AI-driven","title":"持续改进与AI-driven","purpose":"定义优化、自动化和AI驱动运营闭环。","store":"改进机制、自动化、AI-Infra Bridge、评估和价值指标。","exclude":"把实验能力写成生产级承诺。","stage":"方案与运营","skills":"service-solution-build","permissions":"能力成熟度必须与Company KB一致。"}
+      ]
+    },
+    "build-implementation": {
+      "label": "Build / Implementation",
+      "directories": [
+        {"path":"Build-Implementation","title":"Build / Implementation","purpose":"组织一次性建设、迁移和实施方案。","store":"设计、实施、计划、测试和移交。","exclude":"持续托管运营责任。","stage":"方案设计","skills":"service-solution-build","permissions":"架构与交付Owner审核。"},
+        {"path":"Build-Implementation/架构与设计","title":"架构与设计","purpose":"定义目标架构和设计决策。","store":"架构、原则、组件、接口和设计决策。","exclude":"无来源客户现状和越界产品承诺。","stage":"设计","skills":"service-solution-build","permissions":"架构Reviewer审核。"},
+        {"path":"Build-Implementation/实施与迁移","title":"实施与迁移","purpose":"定义实施步骤和迁移路径。","store":"工作包、批次、切换、回退和依赖。","exclude":"无回滚条件的高风险操作。","stage":"实施规划","skills":"service-solution-build","permissions":"交付Owner审核。"},
+        {"path":"Build-Implementation/项目计划与依赖","title":"项目计划与依赖","purpose":"定义里程碑、资源和客户依赖。","store":"计划、资源、前置条件、责任和风险。","exclude":"未经确认的固定工期承诺。","stage":"方案与商务","skills":"delivery-feasibility-review","permissions":"交付Owner确认。"},
+        {"path":"Build-Implementation/测试与验收","title":"测试与验收","purpose":"定义测试、验收和成功标准。","store":"测试策略、用例、验收条件和责任。","exclude":"不可验证的成功描述。","stage":"方案与实施","skills":"service-solution-build","permissions":"客户与交付双方确认边界。"},
+        {"path":"Build-Implementation/移交与知识转移","title":"移交与知识转移","purpose":"定义成果移交和能力转移。","store":"文档、培训、接收标准和保修支持。","exclude":"未包含在范围内的长期运营。","stage":"移交","skills":"presales-handover","permissions":"接收人确认。"}
+      ]
+    },
+    "consulting-assessment": {
+      "label": "Consulting / Assessment",
+      "directories": [
+        {"path":"Consulting-Assessment","title":"Consulting / Assessment","purpose":"组织咨询、诊断和评估项目。","store":"目标、方法、证据、发现、建议和路线图。","exclude":"直接实施和持续运营责任。","stage":"方案设计","skills":"service-solution-build","permissions":"咨询Owner审核。"},
+        {"path":"Consulting-Assessment/咨询目标与范围","title":"咨询目标与范围","purpose":"明确咨询问题、范围和成果。","store":"目标、范围、利益相关方和成果定义。","exclude":"范围外实施承诺。","stage":"启动与方案","skills":"service-solution-build、sow-support","permissions":"客户与咨询Owner确认。"},
+        {"path":"Consulting-Assessment/评估对象与方法","title":"评估对象与方法","purpose":"定义评估框架、样本和方法。","store":"对象、维度、方法、访谈和评分规则。","exclude":"无法解释或验证的黑箱结论。","stage":"方案与评估","skills":"service-solution-build","permissions":"方法Owner审核。"},
+        {"path":"Consulting-Assessment/证据与发现","title":"证据与发现","purpose":"保存证据链和经验证发现。","store":"证据索引、观察、差距和影响。","exclude":"把推测写成客户事实。","stage":"评估","skills":"artifact-index","permissions":"敏感证据最小授权。"},
+        {"path":"Consulting-Assessment/建议与优先级","title":"建议与优先级","purpose":"形成分级建议和决策依据。","store":"建议、优先级、成本、收益、依赖和风险。","exclude":"无条件的技术采购建议。","stage":"分析与汇报","skills":"service-solution-build","permissions":"Owner审核。"},
+        {"path":"Consulting-Assessment/蓝图路线图与成果","title":"蓝图路线图与成果","purpose":"形成目标蓝图、路线图和正式成果。","store":"蓝图、阶段路线、行动项和成果包。","exclude":"未经批准的正式交付版本。","stage":"成果与提交","skills":"external-release-check","permissions":"正式外发受发布Gate。"}
+      ]
+    },
+    "hybrid-integration": {
+      "label": "Hybrid Integration",
+      "directories": [
+        {"path":"Hybrid-Integration","title":"Hybrid Integration","purpose":"组织Build、Transition与Operation组合服务。","store":"跨阶段设计、责任和商业衔接。","exclude":"将多个模块简单拼接而不处理边界。","stage":"方案设计","skills":"service-solution-build、cross-document-consistency","permissions":"多Offering Owner联合审核。"},
+        {"path":"Hybrid-Integration/Build","title":"Build","purpose":"定义建设阶段的范围和成果。","store":"架构、实施、迁移、测试和验收。","exclude":"运营阶段责任。","stage":"Build","skills":"service-solution-build","permissions":"Build Owner审核。"},
+        {"path":"Hybrid-Integration/Transition","title":"Transition","purpose":"定义建设到运营的转换和接管。","store":"移交条件、接管计划、基线、知识转移和稳定化。","exclude":"依赖未满足却承诺无缝接管。","stage":"Transition","skills":"presales-handover","permissions":"Build与Operation Owner共同审核。"},
+        {"path":"Hybrid-Integration/Operation","title":"Operation","purpose":"定义持续运营范围和保障。","store":"服务目录、运营治理、SLA和持续改进。","exclude":"Build范围重复计价或责任重叠。","stage":"Operation","skills":"service-solution-build、sow-support","permissions":"Operation Owner审核。"},
+        {"path":"Hybrid-Integration/跨阶段责任与商业衔接","title":"跨阶段责任与商业衔接","purpose":"控制阶段接口、责任、验收和收费衔接。","store":"跨阶段RACI、前置条件、验收、计费起点和变更机制。","exclude":"模糊接口和重复承诺。","stage":"全阶段","skills":"cross-document-consistency","permissions":"Bid、交付和商务Owner联合确认。"}
+      ]
+    }
+  }
+}

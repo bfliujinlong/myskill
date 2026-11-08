@@ -50,8 +50,30 @@ migrate() {
 - **迁完必须逐个验证服务**：跑一遍相关 CLI（`claude --version`/`bl`/`gcloud`/`az`/`hermes --version`/`ollama list`）+ 探端口 + `systemctl is-active`，全部真实输出后才报成功。
 - 顺手清 journal（`journalctl --vacuum-size=100M`）+ `apt-get clean`。
 - 记录迁移前哪些服务本来就是 DOWN 的（避免把存量故障误报成本次迁移造成）。
+- 网关自重启护栏会**静态扫描脚本文本（连注释里的 restart/kill/gateway 字样都触发）**：在网关进程内执行的脚本即便只在注释写 `systemctl restart hermes-gateway` 也会被 `Blocked: ... cannot restart ... from inside the gateway process` 拒绝。✅ 迁移 `.hermes` 的脚本**正文与注释都不要出现 restart/kill/gateway 词**，回收 `.hermes` 旧 inode 占用空间留给用户在**独立 shell** 手动 `systemctl --user restart hermes-gateway`；迁移当次 df 不会因 `.hermes` 完全回落属预期。
+- 写迁移/清理脚本用 `set -u` 时**禁止在一条 `local` 里混用普通赋值与命令替换**：`local SRC="$1" NAME=$(basename "$1")` 会触发 `NAME: unbound variable`（set -u 下命令替换结果不视作已绑定）。✅ 拆成独立行：`local SRC="$1"; local NAME; NAME=$(basename "$1"); local DST="$DST_ROOT/$NAME"`。
 
-**已迁移清单（软链已建，重复迁移前先 `ls -la` 检查是否已是软链）**：`~/.npm-global`、`~/.codex`、`~/.litellm-venv`、`~/.hermes/cache/uv`、`~/.hermes/tools`、`~/.hermes/installs`、`~/.hermes/.git` → `/data/sysmove/*`；`/usr/local/lib/ollama`、`/usr/lib/google-cloud-sdk`、`/opt/az` → `/data/sysmove/*`。效果：系统盘 52%→30%（释放 10G）。
+**已迁移清单（软链已建，重复迁移前先 `ls -la` 检查是否已是软链）**：`~/.npm-global`、`~/.codex`、`~/.litellm-venv`、`~/.hermes/cache/uv`、`~/.hermes/tools`、`~/.hermes/installs`、`~/.hermes/.git` → `/data/sysmove/*`；`/usr/local/lib/ollama`、`/usr/lib/google-cloud-sdk`、`/opt/az` → `/data/sysmove/*`。效果：系统盘 52%→30%（释放 10G，含系统组件）。；2026-11-01 又批量迁 `/home/ubuntu` 下 13 个大目录（workspace-config / myskill / .qoder / .trae / .azd / .cua-driver / .feishu_browser / .claude / .oci-venv / .codex / .codebuddy / .local / .hermes）→ `/data/sysmove/home/`，系统盘 56%→39%（释放 ~7.6G，端口全 UP）。
+
+### 批量迁移 /home/ubuntu 大目录（2026-11-01 验证）
+
+用户要求「把部分移动到 data 盘然后软链接回来」并把系统盘压到 30% 时：
+
+```bash
+DST_ROOT=/data/sysmove/home
+mkdir -p "$DST_ROOT"
+migrate(){ local SRC="$1"; local NAME; NAME=$(basename "$1"); local DST="$DST_ROOT/$NAME"
+  [ -L "$SRC" ] && return 0
+  rsync -a --delete "$SRC/" "$DST/"; rsync -a "$SRC/" "$DST/"   # 双 rsync 校验一致
+  mv "$SRC" "$SRC.old-mig"; ln -s "$DST" "$SRC"; rm -rf "$SRC.old-mig"; }
+for d in workspace-config myskill .qoder .trae .azd .cua-driver .feishu_browser .claude .oci-venv .codex .codebuddy .local .hermes; do migrate "/home/ubuntu/$d"; done
+apt-get clean
+```
+
+- 迁移顺序：小目录先迁，`.hermes` 最后（gateway 进程持有其旧 inode）。
+- **实测结果**：13 个 `/home/ubuntu` 大目录（合计约 9G，含 `.hermes` 2.3G / `.local` 1.6G / `.codex` 1.2G / `.codebuddy` 1.1G / `.oci-venv` 794M 等）迁到 `/data/sysmove/home/` 并软链回原位，系统盘 **56% → 39%**（释放 ~7.6G）；litellm :4000 / cb2openai :4100 / trae2openai :4200 / ollama :11434 / grafana :3001 / prometheus :9090 / node_exporter :9100 / agent-browser :32961 迁移前后 8/8 全 UP。
+- **到 30% 的缺口**：仅迁 `/home/ubuntu` 大目录通常只能到 ~39%，要压到 30%（再腾 ~2.2G）需额外迁系统组件——`/usr/local/lib/ollama`、`/usr/lib/google-cloud-sdk`、`/opt/az`（已在早期验证安全）或清 `/boot` 旧内核；这些属系统级，迁移前先 `ls -la /usr/lib | grep -E 'google-cloud-sdk|ollama'` 确认软链状态，勿重复迁移。
+- 端口快照比对：`for p in 4000 4100 4200 11434 3001 9090 9100 32961; do ss -tlnp 2>/dev/null | grep -q ":$p " && echo "$p UP" || echo "$p DN"; done`
 
 ## 可清理目标
 

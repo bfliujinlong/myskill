@@ -1,0 +1,108 @@
+{
+  "skill": "ms-sow-support",
+  "version": "0.1.0-rc.8",
+  "purpose": "把已成型的服务方案与报价测算汇总为 SOW 工作说明书，严格不扩大范围（PREVIEW 优先）。",
+  "consumes": [
+    {
+      "artifact": "service-solution",
+      "from_skill": "ms-service-solution",
+      "path": "03_方案与应答/01_服务方案/01_共通设计/"
+    },
+    {
+      "artifact": "pricing-estimate",
+      "from_skill": "ms-pricing-support",
+      "path": "04_商务与合同/01_报价与测算/"
+    }
+  ],
+  "produces": [
+    {
+      "artifact": "sow-document",
+      "path": "04_商务与合同/03_Service-Catalog与SOW/",
+      "statuses": [
+        "PREVIEW",
+        "CREATED",
+        "BLOCKED"
+      ]
+    }
+  ],
+  "boundaries": [
+    "SOW 不得扩大方案与报价的范围",
+    "七类区分：已确认范围/候选条款/待确认RACI/待确认验收/待确认里程碑/Exclusions/商务SLA开放项",
+    "In Scope 必须是服务方案范围的子集或等集",
+    "未确认 RACI/验收/里程碑不得固化为合同条款",
+    "不得自行新增 Exclusions（如监控平台采购）",
+    "资质与案例不进入范围也不进入 Exclusions",
+    "检测上游月/季冲突与数量差异，不抹平，冲突时 BLOCKED/警告",
+    "K8s 按3套报价须声明客户最终确认数量待补充",
+    "金额必须引用报价测算，不改写不新增",
+    "不承诺新 SLA/赔偿/合同条款",
+    "不写入 Company KB",
+    "默认 PREVIEW，不覆盖同名文件"
+  ],
+  "inputs": {
+    "required": [
+      {
+        "name": "project.yaml",
+        "location": "项目根",
+        "on_missing": "BLOCKED: 当前目录不是已初始化的 PCS Project，未找到 project.yaml"
+      },
+      {
+        "name": "服务方案",
+        "from_skill": "ms-service-solution",
+        "location": "03_方案与应答/01_服务方案/01_共通设计/",
+        "on_missing": "BLOCKED: 未找到服务方案，SOW 需以方案范围为基准"
+      }
+    ],
+    "upstream_optional": [
+      {
+        "name": "报价测算",
+        "from_skill": "ms-pricing-support",
+        "location": "04_商务与合同/01_报价与测算/",
+        "use": "金额引用来源",
+        "on_missing": "金额栏标'待报价确认'，不自造金额"
+      }
+    ]
+  },
+  "output": {
+    "mode_default": "PREVIEW",
+    "on_save": {
+      "dir": "04_商务与合同/03_Service-Catalog与SOW/",
+      "filename": "YYYY-MM-DD-{客户}-SOW工作说明书.md",
+      "guards": [
+        "客户名称明确，否则 BLOCKED",
+        "服务方案存在，否则 BLOCKED: 未找到服务方案",
+        "目标目录存在，否则 BLOCKED: 请先运行 ms-project-init",
+        "目标文件不存在，否则 BLOCKED: 不覆盖"
+      ]
+    },
+    "references": {
+      "framework": "references/output-template.md（普适框架，9段+七类区分+范围守恒纪律，零客户硬编码）",
+      "adaptation": "references/adaptation-points.md（参数化适配点清单，仅调呈现结构，一切内容来自上游）",
+      "example": "references/reference-example.md（参考实例，reference-only，运行时默认不加载、不照抄）"
+    }
+  },
+  "runtime_flow": [
+    "步骤0 前置检查：project.yaml",
+    "步骤0.5 上游加载：服务方案（必需）+ 报价测算（可选，金额来源）",
+    "步骤0.6 上游一致性检查：频率/数量冲突时保留差异并 BLOCKED，不静默修正、不抹平",
+    "步骤1 适配选档：读 adaptation-points.md，对 SOW 结构各适配点（范围粒度/里程碑/验收/排除项/计量对象）选档→挂上游依据；范围守恒与数量三分不参与适配",
+    "步骤2 框架填充：用 output-template.md 七类区分结构，占位符替换为上游值+选档值",
+    "步骤3 PREVIEW 输出：需示范时参照 reference-example.md，只借结构不抄值"
+  ],
+  "disciplines": [
+    "范围守恒：SOW 已确认范围 ⊆ 服务方案 In Scope，交付物来自方案，不新增",
+    "金额引用：金额引用报价测算结果，不改写、不新增",
+    "未确认不固化：RACI/验收/里程碑未明确前进'待确认'分区，不写成确定合同条款",
+    "Exclusion 保真：区分 Confirmed/Candidate，Candidate 不升级，不自新增排除项；资质与案例不进范围也不进 Exclusions",
+    "数量基线三分：Baseline/pricing_basis/客户确认三者区分，报价数不升级为确认数",
+    "上游一致性检查：频率/数量冲突保留差异并 BLOCKED，不抹平",
+    "只读 KB：严禁写入 /shared/pcs-presales/",
+    "不越界输出：不扩大范围与报价、不写 Company KB、不对外发送"
+  ],
+  "status_declaration": [
+    "PREVIEW",
+    "CREATED: <路径>",
+    "UPDATED: <路径>",
+    "BLOCKED: <原因>"
+  ]
+}

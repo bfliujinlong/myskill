@@ -1,0 +1,25 @@
+{
+  "project": "{客户}-云迁移项目",
+  "target_cloud": "alicloud",
+  "deliverables": [
+    {"id": "D-01", "name": "现状调研报告"},
+    {"id": "D-02", "name": "网络 HLD 设计文档"},
+    {"id": "D-03", "name": "数据库迁移方案"},
+    {"id": "D-04", "name": "监控运维设计方案"},
+    {"id": "D-05", "name": "割接实施方案"}
+  ],
+  "systems": [
+    {"name": "订单系统", "domains": ["网络", "数据库", "监控运维"]},
+    {"name": "会员系统", "domains": ["计算", "存储", "IAM"]}
+  ],
+  "results": [
+    {"case_id": "UAT-NET-001", "status": "pass", "note": ""},
+    {"case_id": "UAT-DAT-001", "status": "pass", "note": ""},
+    {"case_id": "UAT-MON-001", "status": "pass", "note": ""},
+    {"case_id": "UAT-COM-001", "status": "fail", "note": "实例规格比设计少 1 台，待补建"},
+    {"case_id": "UAT-STO-001", "status": "pass", "note": ""},
+    {"case_id": "UAT-IAM-001", "status": "blocked", "note": "客户未开 RAM 子账号审批流，阻塞"},
+    {"case_id": "UAT-BIZ-001", "status": "pass", "note": ""},
+    {"case_id": "UAT-BIZ-002", "status": "pass", "note": ""}
+  ]
+}

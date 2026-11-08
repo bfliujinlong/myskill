@@ -1,0 +1,91 @@
+{
+  "skill": "ms-customer-communication",
+  "version": "0.1.0-rc.8",
+  "purpose": "把客户沟通文字（会议纪要/访谈/澄清）结构化整理为八段记录，四层信息严格分区、来源保真、候选不固化（PREVIEW 优先）。",
+  "consumes": [
+    {
+      "artifact": "pasted-communication-text",
+      "from_skill": "external-input",
+      "path": "user-input"
+    }
+  ],
+  "produces": [
+    {
+      "artifact": "communication-record",
+      "path": "01_客户输入/03_会议访谈与沟通/",
+      "statuses": [
+        "PREVIEW",
+        "CREATED",
+        "BLOCKED"
+      ]
+    }
+  ],
+  "boundaries": [
+    "来源记录，不构成正式范围/承诺/SLA/SOW 依据",
+    "四层分层：已确认需求/已确认边界/目标范围待确认/待澄清问题",
+    "明确采购决定不得降级为'尚未形成需求'",
+    "目标服务范围标注待进一步确认，不升级为已确认需求",
+    "不自动登记商机、不同步任务/风险",
+    "不写入 Company KB",
+    "默认 PREVIEW，不覆盖同名文件"
+  ],
+  "inputs": {
+    "required": [
+      {
+        "name": "project.yaml",
+        "location": "项目根",
+        "on_missing": "BLOCKED: 当前目录不是已初始化的 PCS Project，未找到 project.yaml"
+      },
+      {
+        "name": "客户沟通文本",
+        "location": "用户粘贴文本 或 01_客户输入/03_会议访谈与沟通/",
+        "on_missing": "无沟通文本则无法整理"
+      }
+    ],
+    "user_provided": [
+      "客户名称",
+      "沟通日期"
+    ]
+  },
+  "output": {
+    "mode_default": "PREVIEW",
+    "on_save": {
+      "dir": "01_客户输入/03_会议访谈与沟通/",
+      "filename": "YYYY-MM-DD-{客户}-沟通记录.md",
+      "guards": [
+        "客户名称明确，否则 BLOCKED",
+        "project.yaml 存在，否则 BLOCKED",
+        "目标目录存在，否则 BLOCKED: 请先运行 ms-project-init",
+        "目标文件不存在，否则 BLOCKED: 不覆盖"
+      ]
+    },
+    "references": {
+      "framework": "references/output-template.md（普适框架，8段+四层分类+来源保真，零客户硬编码）",
+      "adaptation": "references/adaptation-points.md（参数化适配点清单，仅调记录组织形式，一切内容来自沟通文本）",
+      "example": "references/reference-example.md（参考实例，reference-only，运行时默认不加载、不照抄）"
+    }
+  },
+  "runtime_flow": [
+    "步骤0 前置检查：project.yaml（不创建、不修改）",
+    "步骤0.5 输入加载：接收用户粘贴沟通文本 + 客户名/日期；用户明确提供的原样保留，不改写为待确认",
+    "步骤1 适配选档：读 adaptation-points.md，对记录结构各适配点（记录类型/语言/分层侧重）识别沟通特征→选档；四类分类与来源保真纪律不参与适配",
+    "步骤2 框架填充：用 output-template.md 八段结构 + 四层分类填充，四类严格分区不混不升级",
+    "步骤3 PREVIEW 输出：需示范时参照 reference-example.md，只借结构不抄值"
+  ],
+  "disciplines": [
+    "来源保真：只记录输入明确出现的内容，未提供字段写待确认",
+    "四类不混：已确认事实/客户明确问题/探索性表达/模型推断严格分区",
+    "探索不升级：希望了解/是否可以/初步考虑不得升级为已确认需求",
+    "候选不固化：Blocker 与行动项均标'候选，待确认'，不自动写入计划/风险目录",
+    "不补造：不补造角色/责任方/日期/预算/SLA/交付物",
+    "结构化不改事实：可改写语序，但不得改变事实、问题、行动和确定性等级",
+    "只读 KB：严禁写入 /shared/pcs-presales/",
+    "不越界输出：不自动同步至 00_项目管理/、不写 Company KB、不对外发送"
+  ],
+  "status_declaration": [
+    "PREVIEW",
+    "CREATED: <路径>",
+    "UPDATED: <路径>",
+    "BLOCKED: <原因>"
+  ]
+}

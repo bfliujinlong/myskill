@@ -1,0 +1,20 @@
+{
+  "brand": "aws",
+  "name_cn": "AWS",
+  "label": "AWS黑",
+  "primary": "232F3E",
+  "accent": "FF9900",
+  "text": "333333",
+  "muted": "545B64",
+  "heading": "232F3E",
+  "table_shade": "232F3E",
+  "table_shade_text": "FFFFFF",
+  "rule": "232F3E",
+  "font_cn": "宋体",
+  "font_head_cn": "黑体",
+  "font_en": "Calibri",
+  "evidence": "Veolia-AWS Landing Zone Design-LLD-English-V2.3.docx: 16191F x32, 000000, FFFFFF, 333333",
+  "evidence_excluded": "MCD AWS LandingZone LLD 的 C00000 为项目/客户色，非 AWS 品牌色；AWS_QDE_Anchnet_Style.pptx 仅 475569/1E293B 中性灰，无品牌色",
+  "note": "AWS 官方 Navy(Squid Ink) 232F3E 作主色/标题/表头底（用户拍板）；官方辅助橙 FF9900 仅极少量点缀。提取到的 16191F 保留为 evidence 备查",
+  "evidence_user_choice": "用户在 232F3E(官方) 与 16191F(文档提取) 之间拍板选官方 232F3E"
+}

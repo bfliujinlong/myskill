@@ -1,0 +1,139 @@
+{
+  "skill": "ms-service-solution",
+  "version": "0.1.0-rc.10",
+  "purpose": "内化应标策略（赢单主线/取舍/不承诺项）并基于 RFP 要求清单生成服务型 New Bidding 的范围锚定服务方案（PREVIEW 优先）。",
+  "consumes": [
+    {
+      "artifact": "bid-strategy",
+      "from_skill": "internalized(step-0.52)",
+      "path": "02_机会与策略/03_应标策略/",
+      "optional": true,
+      "note": "策略已内化到步骤0.52；若存在独立策略工件（历史留档）则读取复用，缺失不阻断"
+    },
+    {
+      "artifact": "rfp-requirement-list",
+      "from_skill": "ms-rfp-analyze",
+      "path": "03_方案与应答/02_RFP应答与总控/",
+      "required": true,
+      "note": "服务方案必须以 RFP 要求清单为覆盖基准（范围锚定契约）；缺失即 BLOCKED，与 inputs.required / on_save.guards 一致"
+    }
+  ],
+  "produces": [
+    {
+      "artifact": "service-solution",
+      "path": "03_方案与应答/01_服务方案/01_共通设计/",
+      "statuses": [
+        "PREVIEW",
+        "CREATED",
+        "BLOCKED"
+      ]
+    }
+  ],
+  "boundaries": [
+    "步骤0.52 内化应标策略：Win Theme/差异化/取舍/显式假设/不承诺项清单，作为范围锚定依据",
+    "策略取舍与范围锚定一致：0.52 的'本次不做'直接决定 0.55 In-Scope 锁定",
+    "评分归因：SLA 缺口归'服务水平与保障25%'，不无依据归'技术方案40%'",
+    "能力/建议/承诺三栏分离：能力→InScope、建议→候选设计、承诺→合同义务状态；不混写",
+    "退出机制只写建议/待确认，不写'已明确'；不把策略假设写成正式承诺",
+    "不自行承诺 SLA 数字，只引用 Company KB 或标记待确认",
+    "服务范围与应标策略取舍一致，不擅自扩大",
+    "五段拆分：InScope/OutScope/应标证据待补充/候选待确认/SLA授权缺口",
+    "资质与客户案例属于应标证据待补充，不得放入 Out of Scope",
+    "监控平台/Agent部署/非常规变更/并行验证未确认须标候选待确认",
+    "治理频率与 RFP 一致，月度不得改季度；季度仅为额外候选",
+    "无 AI 输入不主动生成 AI 辅助运维章节",
+    "只使用显式能力输入，不自动读取/扫描/推断 Company KB",
+    "不把实验能力写成生产承诺",
+    "无来源 Owner 写待确认，不指定部门",
+    "不写入报价/SOW 目录",
+    "不写入 Company KB",
+    "默认 PREVIEW，不覆盖同名文件"
+  ],
+  "inputs": {
+    "required": [
+      {
+        "name": "project.yaml",
+        "location": "项目根",
+        "on_missing": "BLOCKED: 当前目录不是已初始化的 PCS Project，未找到 project.yaml"
+      },
+      {
+        "name": "应标策略（内化或复用）",
+        "location": "步骤0.52 内化生成；或 02_机会与策略/03_应标策略/ 复用",
+        "on_missing": "不阻断：步骤0.52 内化生成赢单主线"
+      },
+      {
+        "name": "RFP要求清单",
+        "location": "03_方案与应答/02_RFP应答与总控/",
+        "on_missing": "BLOCKED: 未找到 RFP 要求清单，服务方案需以 RFP 覆盖为契约"
+      }
+    ],
+    "kb_readonly": [
+      {
+        "path": "/shared/pcs-presales/02-Offering素材/01-SmartCare标准服务/",
+        "use": "服务项定义 + Service Catalog 三层",
+        "on_missing": "BLOCKED (核心素材)"
+      },
+      {
+        "path": "/shared/pcs-presales/02-Offering素材/02-SLA治理/",
+        "use": "SLA/SLO 矩阵引用 + 治理会议节奏",
+        "on_missing": "BLOCKED (核心素材，SLA 不自造)"
+      },
+      {
+        "path": "/shared/pcs-presales/02-Offering素材/03-Transition与接管/",
+        "use": "接管阶段与退出条件",
+        "on_missing": "提示并继续，接管章节标待补"
+      },
+      {
+        "path": "/shared/pcs-presales/03-Bidding场景素材/",
+        "use": "应标叙事框架 + 场景 Sample",
+        "on_missing": "提示并继续"
+      }
+    ]
+  },
+  "output": {
+    "mode_default": "PREVIEW",
+    "on_save": {
+      "dir": "03_方案与应答/01_服务方案/01_共通设计/",
+      "filename": "YYYY-MM-DD-{客户}-服务方案.md",
+      "guards": [
+        "客户名称明确，否则 BLOCKED",
+        "RFP 要求清单存在，否则 BLOCKED（应标策略缺失不阻断，步骤0.52 内化）",
+        "目标目录存在，否则 BLOCKED: 请先运行 ms-project-init",
+        "目标文件不存在，否则 BLOCKED: 不覆盖"
+      ]
+    },
+    "references": {
+      "framework": "references/output-template.md（普适框架，章节结构+六段拆分+撰写纪律，零客户硬编码）",
+      "adaptation": "references/adaptation-points.md（参数化适配点清单，运行时按上游选档）",
+      "example": "references/reference-example.md（参考实例，reference-only，运行时默认不加载、不照抄）"
+    }
+  },
+  "runtime_flow": [
+    "步骤0 前置检查：project.yaml + engagement_type",
+    "步骤0.5 输入加载：RFP 要求清单/招标分析（可选覆盖对照）+ 显式能力输入",
+    "步骤0.52 应标策略内化：Win Theme/差异化/取舍/不承诺项；有独立工件则复用",
+    "步骤0.55 范围锚定：RFP→策略取舍→In-Scope 锁定→项级目录映射→项级案例佐证→覆盖率自检",
+    "步骤1 六段拆分填充：能力/建议/承诺三栏分离贯穿；合同状态不跨级",
+    "步骤2 PREVIEW 输出/按需保存：参照 reference-example.md，只借结构不抄值",
+    "全程上游一致性检查：策略/RFP/方案冲突时 BLOCKED，不静默修正"
+  ],
+  "disciplines": [
+    "策略内化一致：0.52 取舍与 0.55 In-Scope 锁定一致，不擅自扩大",
+    "评分归因：SLA 缺口归'服务水平与保障25%'，无依据不归'技术方案40%'",
+    "三栏分离：公司能力/方案建议/正式承诺不混写，正式承诺阶段为空或标'不在本阶段承诺'",
+    "不承诺项：SLA 数字/固定价格/交付工期/退出机制等本阶段不承诺项逐条列出",
+    "范围守恒：服务范围不超过应标策略取舍与 RFP 范围",
+    "SLA 不自造：SLA 数字必须引用 KB/客户澄清真实矩阵",
+    "上游一致性检查：策略/RFP/方案冲突时 BLOCKED，不静默修正",
+    "数量基线声明：区分客户 Baseline 与报价 basis",
+    "合同状态 pending：无合同输入时 RFP 强制项不升级为合同义务",
+    "只读 KB：严禁写入 /shared/pcs-presales/",
+    "不写入报价/SOW 目录；不写入 Company KB；不对外发送"
+  ],
+  "status_declaration": [
+    "PREVIEW",
+    "CREATED: <路径>",
+    "UPDATED: <路径>",
+    "BLOCKED: <原因>"
+  ]
+}

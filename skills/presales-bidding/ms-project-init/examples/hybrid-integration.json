@@ -1,0 +1,12 @@
+{
+  "project_id": "SANDBOX-HYBRID-001",
+  "customer_name": "测试客户",
+  "opportunity_name": "Build与Operation组合测试机会",
+  "opportunity_type": "new-bidding",
+  "engagement_type": "hybrid-integration",
+  "stage": "discovery",
+  "owner": "测试Owner",
+  "selected_offerings": ["Cloud Landing Zone", "SmartCare for Cloud"],
+  "language": "zh-CN",
+  "sensitivity": "internal-test"
+}

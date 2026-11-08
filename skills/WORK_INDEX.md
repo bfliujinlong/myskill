@@ -11,6 +11,7 @@
 - `ai-demo-builder` — AI 演示方案工厂
 
 ### 云迁移 / 运维
+- `mig-std/*` — **迁移交付唯一入口**（18 个，2026-10-31 合并后；`migration/` 目录已删除）：01 启动 `mig-startup-orch`·`mig-project-intake`·`mig-resource-assessment`·`mig-sow-generator`（**双模板 + 5 套厂家色系：`--brand` alibaba/tencent/anchnet/aws/azure**，含真实 SOW 事实源）·`brand-doc-kit`（**厂家色系单一事实源：4 类文档 × 5 厂家 = 20 份变体，报价单/HLD/LLD/投标技术标；`--brand` 套色 + 附录E 厂家专有口径**）·`doc-audit-gate`（**文档审计工程师，所有交付文档出口闸门：去AI味+事实红线+色系合规，BLOCK 禁交付**）·`mig-quotation` / 02 调研 `mig-survey-table` / 03 选型 `mig-sizing-advice`·工作量 `mig-app-effort`·快速估算 `mig-quick-estimate`·LLD `mig-lld`·运维手册 `mig-operation-manual` / 04 割接 `mig-cutover-plan`·`mig-cutover-wave`·数据同步 `mig-datasync`·实施编排 `mig-delivery-orch` / 05 验收 `mig-acceptance` / 06 复盘 `mig-retro` / 支撑 `mig-cloud-adapter`
 - `cloud-migration` — 迁移评估/6R/割接
 - `cloud-migration-pm` — 迁移项目管理
 - `landing-zone-pm` — LZ 项目管理

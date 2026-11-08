@@ -1,0 +1,18 @@
+{
+  "brand": "anchnet",
+  "name_cn": "安畅",
+  "label": "安畅红",
+  "primary": "C00000",
+  "accent": "E36C09",
+  "text": "222222",
+  "muted": "555555",
+  "heading": "C00000",
+  "table_shade": "C00000",
+  "table_shade_text": "FFFFFF",
+  "rule": "222222",
+  "font_cn": "宋体",
+  "font_head_cn": "黑体",
+  "font_en": "Calibri",
+  "evidence": "AIOPS_报价单_安畅红.docx: C00000 x6, 222222, FFFFFF, 555555",
+  "note": "深红用于标题与表头底；正文 222222"
+}

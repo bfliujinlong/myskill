@@ -1,0 +1,24 @@
+{
+  "project": "C-Customer CHINA M2C (2026SR1149)",
+  "source_cloud": "on-premise",
+  "target_cloud": "alicloud",
+  "growth_factor": 1.2,
+  "resources": [
+    {"id":"vm-001","name":"erp-app-prod","domain":"compute","vcpu":8,"mem_gb":32,
+     "peak_cpu_pct":22,"peak_mem_pct":61,"os":"CentOS 7","env":"prod"},
+    {"id":"vm-002","name":"erp-app-uat","domain":"compute","vcpu":4,"mem_gb":16,
+     "peak_cpu_pct":15,"peak_mem_pct":40,"os":"CentOS 7","env":"nonprod"},
+    {"id":"vm-003","name":"web-frontend","domain":"compute","vcpu":16,"mem_gb":64,
+     "peak_cpu_pct":78,"peak_mem_pct":70,"os":"CentOS 7","env":"prod"},
+    {"id":"db-001","name":"ltk-prod","domain":"database","engine":"Oracle","version":"11.2",
+     "vcpu":16,"mem_gb":128,"storage_gb":26800,"env":"prod"},
+    {"id":"db-002","name":"appdb-prod","domain":"database","engine":"MySQL","version":"5.6",
+     "vcpu":8,"mem_gb":64,"storage_gb":800,"env":"prod"},
+    {"id":"st-001","name":"cclog-nas","domain":"storage","storage_gb":25000,"env":"prod"},
+    {"id":"ca-001","name":"session-cache","domain":"cache","engine":"Redis","version":"3.2",
+     "vcpu":4,"mem_gb":16,"peak_cpu_pct":25,"peak_mem_pct":55,"env":"prod"},
+    {"id":"ca-002","name":"cache-new","domain":"cache","engine":"Redis","version":"6.0",
+     "vcpu":2,"mem_gb":8,"peak_cpu_pct":35,"peak_mem_pct":60,"env":"prod"},
+    {"id":"vm-004","name":"unknown-spec","domain":"compute","env":"prod"}
+  ]
+}

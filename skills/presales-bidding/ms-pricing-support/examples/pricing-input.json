@@ -1,0 +1,14 @@
+{
+  "currency": "CNY",
+  "project_id": "SANDBOX-EXAMPLE-001",
+  "customer_name": "测试客户",
+  "pricing_note": "无敏感示例，所有数字均为显式测试参数。",
+  "one_time_items": [
+    {"item": "服务接管", "quantity": 1, "unit": "式", "unit_price": 50000}
+  ],
+  "recurring_items": [
+    {"item": "主机托管运维", "quantity": 100, "unit": "台/月", "unit_price": 150}
+  ],
+  "recurring_months": 12,
+  "discount_rate": 0.1
+}

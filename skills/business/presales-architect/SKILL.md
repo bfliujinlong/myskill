@@ -8,12 +8,20 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [售前, 架构, 方案, 提案, 商务, presales]
-    related_skills: [project-manager, business-development, sales]
+    related_skills: [project-manager, business-development, sales, cloud-migration, alibabacloud-migration-survey, migration-plan-gen]
 ---
 
 # 售前架构师（Pre-sales Architect）
 
 ## When to Use（何时使用）
+
+## 交付流水线（迁云售前标准链路）
+
+与 Codex / Claude / Kiro / Hermes 同源技能对齐，按闸门式流水线衔接，前序不过则阻塞后续：
+1. **调研评估报告**：`alibabacloud-migration-survey`（现已扩展为源所有云 → 目标所有云的双向迁云调研），只梳理信息、不报价、不实际迁移。
+2. **报价测算**：调研报告产出后，交给 `presales-solution` / `cloud-pricing-tools` 出人天与金额报价（绝不在调研报告内出现报价/单价/人天费用）。
+3. **迁移方案/计划**：再交给 `migration-plan-gen`（注意其当前方向为 AWS/Azure/GCP → 阿里云，与 survey 的任意→任意互为补充）出实施计划。
+4. **交付管理**：`cloud-migration-pm` 接管 WBS / HLD-LLD / 验收复盘。
 
 - 客户提出需求/招标（RFP/RFQ），需要输出技术方案或投标文档
 - 需要设计系统架构、画架构图、做技术选型对比

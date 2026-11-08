@@ -1,0 +1,12 @@
+{
+  "project_id": "SANDBOX-CONSULT-001",
+  "customer_name": "测试客户",
+  "opportunity_name": "Assessment 测试机会",
+  "opportunity_type": "new-bidding",
+  "engagement_type": "consulting-assessment",
+  "stage": "discovery",
+  "owner": "测试Owner",
+  "selected_offerings": ["Cloud Assessment"],
+  "language": "zh-CN",
+  "sensitivity": "internal-test"
+}

@@ -1,0 +1,18 @@
+{
+  "brand": "azure",
+  "name_cn": "Azure",
+  "label": "Azure浅蓝",
+  "primary": "00477F",
+  "accent": "0078D4",
+  "text": "222222",
+  "muted": "555555",
+  "heading": "00477F",
+  "table_shade": "9CB9D8",
+  "table_shade_text": "000000",
+  "rule": "00477F",
+  "font_cn": "宋体",
+  "font_head_cn": "黑体",
+  "font_en": "Calibri",
+  "evidence": "Cabot_China_Azure_HLD.docx: 00477F x30, 000080 x24, D6DCE4 x12, 9CB9D8 x9",
+  "note": "深蓝 00477F 作标题，浅蓝 9CB9D8 作表头底（黑字），符合用户「Azure 浅蓝」要求"
+}

@@ -1,0 +1,48 @@
+{
+  "project": "C-Customer CHINA M2C (2026SR1149)",
+  "source_cloud": "on-premise",
+  "target_cloud": "alicloud",
+  "owner": "迁移交付团队 / 运维接管组",
+  "domains": ["network", "security", "compute", "storage", "database", "monitoring", "cutover"],
+  "runbooks": [
+    {
+      "id": "RB-DNS-01",
+      "title": "业务域名 DNS 切换到目标云",
+      "domain": "network",
+      "env": "prod",
+      "owner": "网络工程师",
+      "trigger": "割接窗口内目标端业务验证通过，需将生产流量切至目标云",
+      "precheck": [
+        "目标端业务健康检查全绿",
+        "已确认 TTL 提前下调至 60s 并生效",
+        "已确认回滚时的源端入口仍可服务"
+      ],
+      "steps": [
+        "记录切换前解析值与 TTL",
+        "按权重灰度 5% → 50% → 100% 调整解析",
+        "每档观察 10 分钟并核对错误率与延迟"
+      ],
+      "verify": "全量解析生效（dig 多点校验）；业务成功率与切换前持平",
+      "rollback": "解析改回源端 IP，逐档回退并确认生效"
+    },
+    {
+      "id": "RB-DB-ORA-01",
+      "title": "Oracle 11.2 迁移前置兼容性评估",
+      "domain": "database",
+      "env": "pre-prod",
+      "owner": "DBA",
+      "trigger": "源库 Oracle 11.2 已过厂商主流支持，需在迁移前完成兼容性评估",
+      "precheck": [
+        "已取得源库对象清单与字符集/时区信息",
+        "已确认目标端引擎版本与字符集支持范围"
+      ],
+      "steps": [
+        "导出源库对象与依赖清单",
+        "对存储过程/函数/触发器做语法与语义比对",
+        "输出不兼容项清单并给改造建议"
+      ],
+      "verify": "不兼容项清单已评审，每条均有处置结论",
+      "rollback": ""
+    }
+  ]
+}

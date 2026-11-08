@@ -1,0 +1,97 @@
+# 8 朵云统一比价注册表 —— 真值表，全部经过实测
+# status: READY=现在就能取价 / NEED_CRED=需凭据 / BLOCKED=无公开源
+clouds:
+  aws:
+    name: AWS
+    status: READY
+    auth: none
+    method: static-json
+    note: Pricing Calculator 静态端点，匿名免费
+    verified: "2026-10-31 t3.micro=$0.0104/hr"
+    adapter: adapters/aws.py
+
+  azure:
+    name: Azure
+    status: READY
+    auth: none
+    method: rest-api
+    endpoint: https://prices.azure.com/api/retail/prices
+    note: 官方 Retail Prices API，完全匿名
+    verified: "2026-10-31 D2 v3 Linux=$0.096/hr Windows=$0.188/hr"
+    adapter: adapters/azure.py
+
+  alicloud:
+    name: 阿里云
+    status: READY
+    auth: ak
+    method: openapi
+    note: ECS DescribePrice，凭据来自 ~/.aliyun/config.json
+    verified: "2026-10-31 ecs.t6-c1m2.large=CNY 0.236/hr"
+    adapter: adapters/alicloud.py
+
+  gcp:
+    name: Google Cloud
+    status: READY
+    auth: none
+    method: html-scrape
+    endpoint: https://gcloud-compute.com/<machine-type>.html
+    adapter: gcp
+    region: us-central1
+    note: >-
+      官方通道全部不可用（cloudbilling 403 unregistered callers、静态价目表 404、
+      官网 pricing 页纯 JS 渲染）。改用匿名机型详情页：一页覆盖 42 个区域，
+      on-demand USD/hr 直读，7 天本地缓存。零凭据，不需要 API Key。
+    verified: "2026-10-31 e2-standard-2=$0.067 / 4=$0.134 / 8=$0.268 per hr（us-central1）"
+
+  oci:
+    name: Oracle Cloud (OCI)
+    status: READY
+    auth: none
+    method: rest-api
+    endpoint: https://apexapps.oracle.com/pls/apex/cetools/api/v1/products/
+    note: 官方价目 API，完全匿名；668 SKU。计价=OCPU(2vCPU)+内存分开计
+    verified: "2026-10-31 4c16g E4=$0.0740/hr 对比 AWS=$0.1664"
+
+  tencent:
+    name: 腾讯云
+    status: NEED_CRED
+    auth: ak
+    method: openapi
+    endpoint: https://cvm.tencentcloudapi.com/
+    sdk: tencentcloud-sdk-python-cvm==3.1.178
+    actions:
+      price: InquiryPriceRunInstances      # InstanceChargeType=POSTPAID_BY_HOUR -> ItemPrice.UnitPrice 元/小时
+      spec: DescribeZoneInstanceConfigInfos # CPU/内存/机型/售卖状态
+      spec2: DescribeInstanceTypeConfigs
+    cred: ~/.tencentcloud/credentials (ini, 600) 或 TENCENTCLOUD_SECRET_ID/_KEY
+    note: >-
+      匿名通道全部堵死（官网 pricing 页只有包年包月 元/年，口径与 On-Demand 不可混；
+      queryPrice 类 CGI 需登录）。必须 CAM 子用户 AK。详见 CREDENTIALS.md。
+    verified: "2026-10-31 签名前返回 InvalidParameter；action 已在 SDK 内确认存在"
+
+  huawei:
+    name: 华为云
+    status: READY
+    auth: none
+    method: rest-api
+    endpoint: https://portal-intl.huaweicloud.com/api/calculator/rest/cbc/portalcalculatornodeservice/v4/api/productInfo?urlPath=ecs
+    note: 价格计算器 productInfo 接口，完全匿名；intl 站 USD 直读，418 条规格。不支持按 region 过滤，恒返回站点默认区域快照
+    verified: "2026-10-31 s6.2xlarge.4=$0.32/hr（intl/ap-southeast-1）"
+    adapter: adapters/huawei.py
+
+  volcengine:
+    name: 火山引擎
+    status: NEED_CRED
+    auth: ak
+    method: openapi
+    sdk: volcenginesdk-billing==5.0.56 + volcenginesdk-ecs==5.0.56
+    actions:
+      price: QueryPriceForPayAsYouGo      # billing 包内确认存在；需 product + config_list[].configuration_code/charge_item_code
+      spec: DescribeInstanceTypes
+    cred: ~/.volcengine/config.json (json, 600) 或 VOLCENGINE_ACCESS_KEY/_SECRET_KEY
+    note: >-
+      匿名通道 11 条路径全堵（www /api/price/* 返回 HTTP 200 + 158B UnauthorizedAccess，
+      极易误判成成功；sparecores 无此厂商；infracost 403）。必须 IAM 子账号 AK/SK。
+      ECS 包内只有 DescribeSpotPriceHistory（竞价），按需询价在 billing 包。
+      configuration_code 枚举需实调确认，可能退化为手工录入。详见 CREDENTIALS.md。
+    verified: "2026-10-31 无凭据 400 / UnauthorizedAccess；action 已在 SDK 内确认存在"

@@ -1,0 +1,23 @@
+{
+  "project": "样例客户-云迁移（RFP 第1次调研）",
+  "source_cloud": "aws",
+  "target_cloud": "alicloud",
+  "resources": {
+    "business_systems": 10,
+    "vms": 80,
+    "kubernetes_nodes": 12,
+    "container_instances": 60,
+    "databases": {"mysql": 4, "oracle": 2, "sqlserver": 1, "redis": 3, "mongodb": 1}
+  },
+  "complexity": {
+    "technical_complexity": 3.5,
+    "business_complexity": 3.5,
+    "integration_complexity": 3.0,
+    "security_complexity": 4.0,
+    "compliance_complexity": 4.5
+  },
+  "rates": {"junior": 2000, "mid": 2500, "senior": 3500, "pm": 4000},
+  "headcount": {"junior": 0.30, "mid": 0.45, "senior": 0.20, "pm": 0.05},
+  "other_costs": {"training": 45000, "contingency": 75000, "resource": 100000},
+  "band": 0.25
+}

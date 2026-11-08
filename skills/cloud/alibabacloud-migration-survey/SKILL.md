@@ -1,6 +1,5 @@
----
 name: alibabacloud-migration-mas-cloud-migration-survey
-description: 当用户提供迁云调研材料（Excel/Word/文本/CSV文件）并要求生成结构化调研报告时，自动分析汇总并输出 .docx 文档。涵盖客户画像、架构现状、云产品映射、版本兼容性风险、迁移风险、待确认事项。支持 AWS/Azure/GCP/华为云/腾讯云/百度云/IDC 到阿里云的迁移评估。适用于阿里云迁云项目售前或交付调研阶段。本 skill 仅做信息梳理和报告生成，不执行实际迁移操作，不生成报价方案。
+description: 当用户提供迁云调研材料（Excel/Word/文本/CSV文件）并要求生成结构化调研报告时，自动分析汇总并输出 .docx 文档。涵盖客户画像、架构现状、云产品映射、版本兼容性风险、迁移风险、待确认事项。支持 源所有云（AWS/Azure/GCP/华为云/腾讯云/百度云/IDC）→ 目标所有云（AWS/Azure/GCP/华为云/腾讯云/百度云/OCI/IDC）的双向迁云评估；目标=阿里云时沿用原阿里云映射与版本红线，目标=其他云时按多云扩展参考选型。适用于任意云迁移项目的售前或交付调研阶段。本 skill 仅做信息梳理和报告生成，不执行实际迁移操作，不生成报价方案。
 ---
 
 # Cloud Migration Survey Analyzer
@@ -58,7 +57,7 @@ This skill is content-generation oriented and does not call external MCP tools. 
 
 ### Scenario 5: When the skill should NOT be used
 **Recognition**: the user only needs a verbal summary, needs a pricing proposal, or needs to perform an actual migration operation.
-**Handling**: inform the user this skill does not apply and suggest an alternative.
+**Handling**: inform the user this skill does not apply and suggest an alternative. 注意：本 skill 已覆盖「源所有云 → 目标所有云」任意组合的迁云调研评估（含 OCI/AWS/Azure/GCP/华为云/腾讯云/百度云/IDC），只有纯口头总结、报价或实际迁移操作三类才不属于本 skill 范围。
 
 ## Execution Flow
 
@@ -131,15 +130,17 @@ The mapping tables cover nine categories:
 - **Security**: RAM/KMS/SSL Certificate/Security Center/Bastionhost
 - **Observability**: SLS/CloudMonitor/ARMS/ActionTrail
 
+> **多云目标扩展**：当 `target_cloud` 不为「阿里云」时，产品映射改用 `references/cloud-mapping-multicloud.md`（按目标云选列），版本红线改用 `references/version-risks-multicloud.md`（按目标云最低可选版本）。`references/cloud-mapping.md` 与 `references/version-risks.md` 仅用于目标=阿里云的场景，二者互为补充、不冲突。
+
 ### 5. Version compatibility risk assessment (important)
 
 For every component that carries version information, assess the risk with reference to `references/version-risks.md`:
 
 1. **Extract the source version**: identify the component name and version number from the survey materials.
-2. **Compare against the Alibaba Cloud minimum version**: look up the version risk matrix in version-risks.md.
+2. **Compare against the target cloud minimum version**: 若 `target_cloud=阿里云`，查 `references/version-risks.md`；若目标为其他云，查 `references/version-risks-multicloud.md`（按目标云的最低可选版本/红线判定，切勿套用阿里云标准）。
 3. **Mark the risk level**:
-   - 🔴 High risk: the source version is below the minimum selectable version on Alibaba Cloud; upgrade is mandatory.
-   - 🟡 Medium risk: supported by Alibaba Cloud but the version is old; upgrade is recommended.
+   - 🔴 High risk: the source version is below the minimum selectable version on the **target** cloud; upgrade is mandatory.
+   - 🟡 Medium risk: supported by the target cloud but the version is old; upgrade is recommended.
    - 🟢 Low / no risk: version compatible.
 4. **Record into survey_data**: fill the version risk information into the `version_risks` field.
 
@@ -149,6 +150,7 @@ For every component that carries version information, assess the risk with refer
 - RDS MySQL < 5.6: minimum on Alibaba Cloud is 5.6.
 - K8s < 1.22: not supported by ACK; many APIs are already deprecated.
 - Kafka < 0.11: Alibaba Cloud is incompatible with the old protocol versions.
+> 当目标云 ≠ 阿里云时，上述红线以 `references/version-risks-multicloud.md` 中对应目标云的最低可选版本为准（例如 OCI MySQL 默认 8.x、OKE 最低 1.20；AWS EKS 已不支持 1.22 及以下等）。
 
 ### 6. Generate the report
 
@@ -210,7 +212,7 @@ from scripts.generate_report import generate_report, quality_check
 survey_data = {
     'customer_name': 'XX Tech',
     'source_cloud': 'Huawei Cloud',
-    'target_cloud': 'Alibaba Cloud',
+    'target_cloud': 'OCI',
     'business_type': 'E-commerce/Retail',
     'core_scenarios': ['Online Trading', 'Data Analysis', 'User Recommendation'],
     'peak_hours': 'Daily 10:00-12:00, 20:00-22:00',
@@ -222,20 +224,20 @@ survey_data = {
         'Compute': {'count': '200 instances', 'version': 'N/A', 'specs': '8C32G ~ 32C128G', 'migration_notes': 'Mainly Java apps, mapping to Alibaba Cloud g8/c8 series', 'supplement': ''},
         'Storage': {'count': '500TB', 'version': 'N/A', 'specs': 'OBS Standard + Parallel File System', 'migration_notes': 'Online migration service; parallel file system maps to OSS-HDFS', 'supplement': 'Images, logs, backups'},
         'Database': {'count': '30 instances', 'version': 'MySQL 5.7 + GaussDB', 'specs': 'Primary-replica architecture', 'migration_notes': 'MySQL 5.7->8.0 requires upgrade, recommend traffic replay tool for validation; GaussDB->PolarDB requires SQL refactoring', 'supplement': ''},
-        'Cache': {'count': '10 instances', 'version': 'Redis 4.0', 'specs': 'GeminiDB Redis (using exHash)', 'migration_notes': '[Version upgrade] Redis 4.0->5.0+ required; exHash requires Tair memory edition', 'supplement': ''},
+        'Cache': {'count': '10 instances', 'version': 'Redis 4.0', 'specs': 'GeminiDB Redis (using exHash)', 'migration_notes': '[Version upgrade] Redis 4.0->7.0 required on OCI; exHash requires re-implementation or managed Redis with compatible client', 'supplement': ''},
         'Message Queue': {'count': '5 clusters', 'version': 'Kafka 2.8 + RabbitMQ 3.9', 'specs': 'DMS Kafka + DMS RabbitMQ', 'migration_notes': 'Kafka compatible; RabbitMQ maps to Alibaba Cloud RabbitMQ edition', 'supplement': ''},
     },
     'product_mapping': [
-        ('ECS', 'ECS', 'SMC migration / redeploy'),
-        ('OBS', 'OSS', 'Online migration service'),
-        ('RDS MySQL', 'RDS MySQL 8.0', 'DTS full + incremental sync'),
-        ('GaussDB', 'PolarDB', 'Data migration + SQL refactoring'),
-        ('GeminiDB Redis', 'Tair Memory', 'Redis-Shake online sync'),
-        ('DMS Kafka', 'ApsaraMQ Kafka', 'MirrorMaker migration'),
-        ('DMS RabbitMQ', 'ApsaraMQ RabbitMQ', 'AMQP protocol compatible, smooth migration'),
+        ('ECS', 'OCI Compute', 'Image export + redeploy'),
+        ('OBS', 'OCI Object Storage', 'Online/parallel data migration'),
+        ('RDS MySQL', 'OCI MySQL DB System 8.x', 'OCI Database Migration / DMS full + incremental sync'),
+        ('GaussDB', 'OCI Base Database (MySQL/PostgreSQL)', 'Data migration + SQL refactoring'),
+        ('GeminiDB Redis', 'OCI Cache (managed Redis 7.0)', 'Redis-Shake online sync'),
+        ('DMS Kafka', 'OCI Streaming (Kafka API)', 'MirrorMaker migration'),
+        ('DMS RabbitMQ', 'Self-managed RabbitMQ on OCI', 'AMQP protocol compatible, smooth migration'),
     ],
     'version_risks': [
-        {'component': 'Redis', 'source_version': '4.0', 'target_version': '5.0+', 'risk_level': 'High', 'notes': 'No 4.0 on Alibaba Cloud; exHash requires Tair memory edition'},
+        {'component': 'Redis', 'source_version': '4.0', 'target_version': '7.0', 'risk_level': 'High', 'notes': 'OCI managed Redis minimum 7.0; exHash requires client-side re-implementation'},
         {'component': 'MySQL', 'source_version': '5.7', 'target_version': '8.0', 'risk_level': 'Medium', 'notes': 'Recommend traffic replay tool for compatibility validation'},
     ],
     'risks': [
@@ -252,9 +254,9 @@ survey_data = {
     ],
     'next_steps': [
         'Export complete Huawei Cloud resource inventory',
-        'Set up Alibaba Cloud test environment for POC',
-        'Complete GaussDB -> PolarDB compatibility testing',
-        'Validate Tair memory edition compatibility with exHash commands',
+        'Set up OCI test environment (Always Free eligible) for POC',
+        'Complete GaussDB -> OCI Base Database compatibility testing',
+        'Validate managed Redis 7.0 compatibility with client commands',
         'Develop detailed cutover plan',
     ],
 }
@@ -321,7 +323,16 @@ The report is a Chinese `.docx` document containing a cover page, table of conte
 
 - Dependency list: [scripts/requirements.txt](scripts/requirements.txt)
 - Cloud product mapping reference: [references/cloud-mapping.md](references/cloud-mapping.md)
+- Multi-cloud target product mapping reference: [references/cloud-mapping-multicloud.md](references/cloud-mapping-multicloud.md)
 - Version compatibility risk reference: [references/version-risks.md](references/version-risks.md)
+- Multi-cloud target version risk reference: [references/version-risks-multicloud.md](references/version-risks-multicloud.md)
+
+## 下游衔接（交付流水线）
+
+本技能是迁云售前链路的第 1 环（调研评估），仅梳理信息、不报价、不实际迁移：
+- **报价测算**：报告产出后交给 `presales-solution` / `cloud-pricing-tools`（安畅人天制：架构师/PM ¥2,500/人日、工程师 ¥1,900/人日、税率 6%）。
+- **迁移方案/计划**：再交给 `migration-plan-gen`（当前方向为 AWS/Azure/GCP → 阿里云，与本技能的任意源→任意目标调研互为补充）与 `cloud-migration-pm`（WBS/HLD-LLD/验收复盘）。
+- **报价红线**：本步骤产物严格禁止出现 报价/单价/人天费用/月度费用/年度费用 等字样（quality_check 自动拦截）。
 - File extraction script: [scripts/extract.py](scripts/extract.py)
 - Missing-input reconstruction script (fallback): [scripts/prepare_sample_input.py](scripts/prepare_sample_input.py)
 - Report generation script: [scripts/generate_report.py](scripts/generate_report.py)

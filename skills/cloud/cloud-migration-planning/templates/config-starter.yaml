@@ -1,0 +1,47 @@
+# 云迁移规划配置 —— 已按 jinlongliu 实际业务定制
+# 来源: aj-geddes/useful-ai-prompts skills/cloud-migration-planning
+# 定制依据: 安畅 OPC+FDE 业务公约 / QY-DubaiFintech 项目实测数据
+
+# --- 环境配置 ---
+environment: production
+region: me-east-1          # 阿里云迪拜（QY-DubaiFintech 目标区）
+
+# --- 源端与目标 ---
+source_cloud: aws
+target_cloud: alibabacloud
+source_region: multi-region   # AWS 5 个区域
+target_az_count: 2            # me-east-1 实测仅 2 个可用区，无第三 AZ 冗余
+
+# --- 迁移规模基线（QY-DubaiFintech 实测） ---
+scale:
+  ec2_instances: 76
+  rds_instances: 27
+  data_volume_tb: 51
+  network_gbps: 1.0            # 目标带宽档位 100M / 500M / 1G
+
+# --- 6R 策略优先级（业务公约规定） ---
+strategies: [rehost, replatform, repurchase, retain, retire, refactor]
+
+# --- 计价与交付 ---
+rate_usd_per_manday: 350       # AC-MIG 标准人天单价
+sow_chapters: 14               # SOW 标准章节数
+
+# --- 割接约束 ---
+cutover:
+  rollback_mode: stop_not_delete   # 源端 Stop 不 Delete，保留回滚能力
+  observation_days: 7              # 割接后观察期
+  parallel_run: true                # 割接前并行运行
+
+# --- 交付物格式约束（业务公约） ---
+output_style:
+  theme: black_grey            # 黑灰配色
+  color_forbidden: [blue]      # 禁用蓝色
+  bilingual: true              # 中英双语
+  forbid_ai_terms: [赋能, 抓手, 闭环, 一站式]
+
+# --- 安全红线 ---
+security:
+  zero_cost: true              # 零费用硬约束，绝不花信用卡
+  secrets_chmod: 600
+  secrets_never_in_chat: true
+  no_fabricated_personnel: true   # 投标材料绝不虚构人员/案例

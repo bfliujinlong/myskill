@@ -1,0 +1,23 @@
+{
+  "project": "C-Customer CHINA M2C",
+  "track": "business-migration",
+  "start_date": "2026-11-03",
+  "hours_per_day": 8,
+  "team_size": 2,
+  "scale": 1.0,
+  "done": ["A-001", "A-002", "A-003", "A-004", "A-005"],
+  "blocked": [
+    {"id": "A-035", "reason": "客户侧专线未开通，运营商工单未回"}
+  ],
+  "extra_actions": [
+    {
+      "id": "A-100",
+      "name": "专线开通状态跟进（每日同步运营商工单）",
+      "phase": "实施部署",
+      "trigger": "manual",
+      "hours": 4,
+      "priority": "high",
+      "depends_on": ["A-034"]
+    }
+  ]
+}

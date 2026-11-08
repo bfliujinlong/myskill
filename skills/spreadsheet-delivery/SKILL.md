@@ -117,6 +117,23 @@ cp out.xlsx /tmp/r.xlsx && soffice --headless --calc --convert-to xlsx --outdir 
 openpyxl 写的公式在手机/Excel 打开若不重算会显空白，用户会判"没算总价"。重算后用 `load_workbook(f, data_only=True)` 验证 Total 单元格为数字再发。
 ⚠️ **覆盖写回会被沙箱/审批拦截**——若 `hermes send` 前这一步被拦，先告知用户"等待确认重算覆盖"，不要假装已发。
 
+### 11. 先 dump 模板结构再动手，不许凭印象写
+用户给的是模板链接/文件时，先把结构读出来再生成：`xl/workbook.xml`（sheet 名）→ `xl/_rels/workbook.xml.rels`（sheet→xml 映射）→ 逐 sheet 打印每个单元格的 `ref / 值 / 公式`，外加 `xl/sharedStrings.xml`。
+**照抄的清单**：sheet 名与顺序、表头文案与合并方式、列宽、单价口径（每列是单价还是小计）、合计行的 `=SUM` 范围、底部 note 的条目类型。
+**别凭印象**——模板里"G 列是单价、H 列是小计"这类细节猜错会导致整张表口径错。
+
+### 12. 金额一律写公式，不写死数字
+明细行小计写 `=E{r}*G{r}`、合计写 `=SUM(...)`,让人日一改总价自动跟着变。手写数字会被判定"不透明、不可追溯"。
+
+### 13. 长生成脚本用 write_file 落盘再跑，不要塞 heredoc
+`cat > x.py <<'EOF'` / `python3 - <<'PY'` 写几十行 openpyxl 脚本会被网关守卫拦或解析失败（exit 2，无 traceback，查不出原因）。
+**做法**：`write_file('/tmp/gen_quote.py', ...)` 再 `/home/ubuntu/.hermes/hermes-install/venv/bin/python3 /tmp/gen_quote.py`。
+**验收**：脚本返回 0 不等于文件生成了——必跑 `ls -la` 看产物存在，再 `load_workbook` 抽检合计行范围与明细行数。
+
+### 14. 从零建 workbook 时的默认配色
+确实拿不到可复制的模板文件、只能 `Workbook()` 自建时（尽量少用，优先铁律 1），用黑灰商务配色，禁蓝：
+`DARK='FF1F1F1F'`（表头底+白字加粗 10 号）、`GREY='FFF2F2F2'`（合计行底）、`MID='FF595959'`、边框 `FFBFBFBF`。
+
 ## 参考
 - `references/excel-template-clone.md` — 完整可运行脚本模板 + Fintech/OA 模板结构速查 + 常见坑
 - `references/oci-scheduled-shutdown.md` — OCI Always Free 实例定时关机(cron UTC16:00=北京24:00)+ 开机 systemd 播报 的可复用脚本

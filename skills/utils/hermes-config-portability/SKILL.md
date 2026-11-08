@@ -116,6 +116,24 @@ git clone https://github.com/<user>/<repo>.git ~/.hermes/skills-migrated
 cp -r skills-migrated/skills/* ~/.hermes/skills/
 ```
 
+## 打包交付包（本地导出 / 送 Telegram）
+
+当用户要「把某些 skill 打包发我 / 导出」时，产物是本地 tar.gz 经 Telegram 送达，不是 git push。流程与安全闸门（详细命令见 `references/skill-bundle-delivery.md`）：
+
+### 流程
+1. **取真实改动清单**：`find ~/.hermes/skills -maxdepth 2 -type d -newermt "YYYY-MM-DD 00:00" ! -newermt "YYYY-MM-DD+1 06:00"` 拉目标时间窗内真实改过的顶层 skill 目录，去重作打包清单。**不要**信任既有 bundle 的 manifest 声明范围**（见陷阱 12）**。`
+2. **剔除内部拓扑**：进包前 `rm -f <src>/memory/HERMES_ENV-REGISTRY.md` —— 含 GCP 公网 IP / OCI 资源 ID / Cloudflare 隧道 ID，属内部环境地图，按用户红线不得外发。`
+3. **剔除膨胀物**：删 `skills/*/.git`、`tests/` 下大体积测试件（PDF/Epub/DOCX）、`adapters/.cache/*.json` 等历史大文件，避免单包超 Telegram 50MB 上限发不出去。`
+4. **内容级敏感扫描**（文件名不够，要扫值）：`grep -rIlE "(sk-[a-zA-Z0-9]{20,}|AKID[0-9A-Z]{10,}|-----BEGIN|api[_-]?key[\"'= :]{0,4}[A-Za-z0-9_\-]{16,})" <src>` —— 命中真实密钥值必须清除；文档占位符（如 `sk-ant-...` 示例）可保留。`
+5. **打包**：`tar czf /home/ubuntu/<name>.tar.gz -C <src> .`（本机无 `zip`，用 tar.gz；如需 Windows 兼容 zip，用 python `zipfile` 生成，勿依赖系统 zip）。`
+6. **校验 + 发送**：用 search_files 列出确认体积 <50MB；用 `terminal echo "MEDIA:/abs/path.tar.gz"` 触发 Telegram 附件。`
+
+### 陷阱
+12. **既有 bundle 的 manifest 声明 ≠ 实际内容** → 曾有一个 manifest 写「含迁移类」的包实际只收了售前 `ms-pcs-*` 系列，整条 `mig-*` / `team-agent-binding` 被漏掉。原因：打包脚本按白名单目录收集，新加的 skill 目录未进白名单。✅ 交付任何 bundle 前 `tar tzf <pkg>` 列实际成员，对照宣称范围逐项核对；并以 `find -newermt` 取真实改动清单为权威源，而非依赖旧 manifest。`
+13. **内部拓扑台账随 memory 一起进包** → `HERMES_ENV-REGISTRY.md` 含真实公网 IP / 云资源 ID，外发即泄露环境地图。✅ 凡「含 memory 的导出包」默认剔除该文件；纯 skill 包则本就不含，免忧。`
+14. **单文件超 50MB 无法经 Telegram 送达** → 带 `tests/` 12MB PDF + `.git` pack 的 skill 会让整包冲到 67MB 发不出去。✅ 打包前去 `du -sh skills/*` 定位大目录，剔除 `.git` / 测试件 / 缓存 JSON；纯 skill 文本通常 <2MB。`
+15. **文件名扫描漏掉内联密钥** → 只 `ls` 看文件名会放过写在 skill 脚本/配置里的明文 key。✅ 用上面的值级正则扫内容；只看文件名不算过关。`
+
 ## 常见陷阱（实测）
 
 1. **skill 文档里写真实 key 当示例** → GitHub 判定为 GCP/飞书/Lark 密钥直接拦 push。文档示例必须用 `<PLACEHOLDER>`，真实 key 用 filter-repo 替换。
@@ -171,6 +189,15 @@ bash ~/.hermes/oci-monitor/restore_hermes.sh
 
 ⚠️ **不要备份 dsh 源码 `dsh-src/`（含 node_modules 1.5G）**——只备份配置，源码新机重装。
 ⚠️ **机器时区确认**：cron 按 UTC，上海周日24:00 = UTC 周日16:00。若机器时区是 Asia/Shanghai 需换算。
+
+## 双仓同步实证坑（2026-10-25，myskill + hermes-backup 均跑通）
+
+- **两个仓库走不同 SSH key**：`~/.ssh/github_backup` 是 `hermes-backup` 的**单仓 deploy key**，推 `bfliujinlong/myskill` 必失败：`Permission to bfliujinlong/myskill.git denied to deploy key`。myskill 必须用全局 user key `~/.ssh/id_ed25519_github`（`ssh -T git@github.com` 回 `Hi bfliujinlong!` 即账号级权限；回 `Hi <user>/<repo>!` 说明是单仓 deploy key）。判断：`ssh -T -o IdentitiesOnly=yes -i <key> git@github.com`。
+- **myskill 开了分支保护**：`git push --force` 被 `push declined due to repository rule violations` 拒。→ 先 `git fetch -q origin main` + `git checkout -q -B main origin/main` 保持 fast-forward，再普通 `git push -u origin main`。
+- **内嵌 `.git` 清理必须 `find skills -mindepth 1`（含 1）**：用 mindepth 2 时，顶层就是 git clone 的 skill（如 `skills/translate-book`）会被存成 **gitlink 160000**，clone 出来是空目录。已入库的 gitlink 还需显式 `git rm -r --cached` 清掉，光删目录不够：`for gl in $(git ls-files -s skills | awk '$1=="160000"{print $4}'); do git rm -r --cached --quiet "$gl"; done`
+- **`.gitignore` 追加要用 `grep -qxF` 去重**，否则脚本每次运行都重复追加一段。
+- **push 前跑密钥扫描**：`grep -rlI -E "ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{32,}|AKIA[0-9A-Z]{16}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY" skills/` —— 命中多为文档占位符（`ghp_xx...xxxx`、阿里云文档示例 `sk-123...5f78`），看上下文确认再放行，别一律当泄露。
+- 改完脚本必须**手动跑一遍脚本本身**（不是只跑等价命令），确认 exit 0 且 `git rev-parse HEAD origin/main` 同值。
 
 ## 与 overseas-model-hub 的配合
 

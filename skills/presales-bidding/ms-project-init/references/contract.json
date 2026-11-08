@@ -1,0 +1,18 @@
+{
+  "skill": "ms-project-init",
+  "version": "0.1.0-rc.8",
+  "consumes": [
+    {"artifact": "project-variables", "from_skill": "external-input", "path": "project.yaml"}
+  ],
+  "produces": [
+    {"artifact": "workspace-skeleton", "path": "./", "statuses": ["created", "skipped", "working"]},
+    {"artifact": "project.yaml", "path": "project.yaml", "statuses": ["working"]}
+  ],
+  "boundaries": [
+    "只 create-if-missing，不覆盖已有文件",
+    "不写入或复制 Company KB",
+    "不推断客户身份或行业",
+    "不默认创建 POC",
+    "工件状态只到 working"
+  ]
+}

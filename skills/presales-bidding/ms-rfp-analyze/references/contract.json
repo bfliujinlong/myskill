@@ -1,0 +1,114 @@
+{
+  "skill": "ms-rfp-analyze",
+  "version": "0.1.0-rc.10",
+  "purpose": "把正式 RFP / 采购需求书拆解为可追溯的采购要求与约束清单（仅提取，不补造能力，PREVIEW 优先），并在清单之上产出招标分析报告（资质匹配/覆盖度/评分解读/竞争态势/投标决策 PROCEED-HOLD-DECLINE，吸收原 opportunity-intake 决策功能）。",
+  "consumes": [
+    {
+      "artifact": "formal-rfp",
+      "from_skill": "external-input",
+      "path": "01_客户输入/01_RFP与采购文件/"
+    },
+    {
+      "artifact": "company_intro",
+      "from_skill": "kb-semantic-key",
+      "tier": "optional",
+      "note": "资质匹配数据源；未注入→WARN 待补充，不虚构"
+    },
+    {
+      "artifact": "service_catalog_master",
+      "from_skill": "kb-semantic-key",
+      "tier": "optional",
+      "note": "覆盖度反查母版；未注入→WARN 待补充"
+    }
+  ],
+  "produces": [
+    {
+      "artifact": "rfp-requirement-list",
+      "path": "03_方案与应答/02_RFP应答与总控/",
+      "statuses": [
+        "PREVIEW",
+        "CREATED",
+        "BLOCKED"
+      ]
+    },
+    {
+      "artifact": "rfp-analysis-report",
+      "path": "03_方案与应答/02_RFP应答与总控/",
+      "note": "招标分析报告（5 维 + 投标决策），与要求清单物理分离",
+      "statuses": [
+        "PREVIEW",
+        "CREATED",
+        "BLOCKED"
+      ]
+    }
+  ],
+  "boundaries": [
+    "无正式 RFP 时 BLOCK，不运行；完全无 RFP 的机会走留判断超出本插件范围，pre-RFP 沟通用 ms-customer-communication 归档",
+    "不从会议记录/口头意向补造 RFP",
+    "要求清单（步骤1）只提取采购要求与约束，不补造公司能力、不判断满足度",
+    "满足度/覆盖度判断仅在招标分析（步骤1.5）进行，须标数据源，未注入 KB 标'待补充'",
+    "招标分析结论不得回写污染要求清单",
+    "投标决策只输出 PROCEED/HOLD/DECLINE 建议 + 依据 + 依赖项；资质硬缺口不得 PROCEED",
+    "不撰写应答稿内容，不改写客户原始 RFP，不写入 Company KB",
+    "默认 PREVIEW，不覆盖同名文件"
+  ],
+  "inputs": {
+    "required": [
+      {
+        "name": "project.yaml",
+        "location": "项目根",
+        "on_missing": "BLOCKED: 当前目录不是已初始化的 PCS Project，未找到 project.yaml"
+      },
+      {
+        "name": "正式 RFP / 采购需求书",
+        "location": "01_客户输入/01_RFP与采购文件/ 或用户粘贴原文",
+        "on_missing": "BLOCKED: 未提供正式 RFP / 采购需求书，本 Skill 不在无正式 RFP 时运行；不得从会议纪要/口头意向补造 RFP"
+      }
+    ]
+  },
+  "output": {
+    "mode_default": "PREVIEW",
+    "on_save": {
+      "dir": "03_方案与应答/02_RFP应答与总控/",
+      "filename": "YYYY-MM-DD-{客户}-RFP要求清单.md",
+      "filename_analysis_report": "YYYY-MM-DD-{客户}-招标分析报告.md（步骤1.5 产出，与要求清单物理分离，另存）",
+      "guards": [
+        "客户名称明确，否则 BLOCKED",
+        "正式 RFP 已确认存在，否则 BLOCKED: 未提供正式 RFP",
+        "目标目录存在，否则 BLOCKED: 请先运行 ms-project-init",
+        "目标文件不存在，否则 BLOCKED: 不覆盖"
+      ]
+    },
+    "references": {
+      "framework": "references/output-template.md（普适框架，8段提取结构+提取保真纪律，零客户硬编码）",
+      "adaptation": "references/adaptation-points.md（参数化适配点清单，仅调提取组织结构，一切内容来自 RFP 原文）",
+      "example": "references/reference-example.md（参考实例，reference-only，运行时默认不加载、不照抄）"
+    }
+  },
+  "runtime_flow": [
+    "步骤0 前置检查：project.yaml",
+    "步骤0.5 正式 RFP 存在性闸门：无正式 RFP → BLOCKED，不得从会议纪要/口头意向补造",
+    "步骤1 适配选档：读 adaptation-points.md，对提取结构各适配点（编号体系/强制性分级/评分体系/约束类型）按 RFP 原文特征选档；提取保真与资质保真不参与适配",
+    "步骤2 框架填充：用 output-template.md 八段结构逐条提取，每条挂 RFP 原文来源",
+    "步骤2.5 招标分析（= SKILL.md 步骤1.5）：在要求清单之上产 5 维分析（资质匹配/覆盖度/评分解读/竞争态势/投标决策），KB 数据源缺失标'待补充'，结论与清单物理分离",
+    "步骤3 PREVIEW 输出：需示范时参照 reference-example.md，只借结构不抄值"
+  ],
+  "disciplines": [
+    "原文保真：只提取 RFP 明确出现的内容，每条挂章节/条款来源",
+    "不补造能力：不写安畅可满足/不满足，不判断满足度",
+    "数量保真：无明确数量写'未给出具体数量，待确认'（quantity_status=unknown），禁止'原文若干/约若干'，不借用下游报价口径",
+    "资质保真：资质类型未明确写'待澄清'，行业示例只进 AI 候选澄清区",
+    "强制性不改：不改变要求的强制 vs 可选等级",
+    "评分照抄：评分维度与权重照抄 RFP，不套用其他项目口径、不沉淀默认权重",
+    "投标决策：只输出 PROCEED/HOLD/DECLINE 建议 + 前4维依据 + 决策依赖项；资质硬缺口不得 PROCEED（至少 HOLD）；措辞为建议非承诺",
+    "分析分离：招标分析我方能力/资质引用须标数据源与版本，未注入 KB 标'待补充'，结论不回写要求清单",
+    "只读 KB：严禁写入 /shared/pcs-presales/",
+    "不越界输出：不改写客户原始 RFP、不写 Company KB、不对外发送"
+  ],
+  "status_declaration": [
+    "PREVIEW",
+    "CREATED: <路径>",
+    "UPDATED: <路径>",
+    "BLOCKED: <原因>"
+  ]
+}

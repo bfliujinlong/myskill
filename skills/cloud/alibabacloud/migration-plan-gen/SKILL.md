@@ -15,6 +15,8 @@ allowed-tools:
 trigger: ["迁移方案", "跨云迁移", "等价方案", "AWS迁移", "Azure迁移", "GCP迁移", "阿里云方案", "cloud migration"]
 ---
 
+# 方向说明：本技能当前仅覆盖 AWS/Azure/GCP/自建机房 → 阿里云 的单向等价方案生成；任意源 → 任意目标（含 OCI/华为云/腾讯云/AWS/Azure/GCP 等双向）的调研评估由 alibabacloud-migration-survey 承接。
+
 # 跨云迁移方案生成
 
 把客户在 AWS/Azure/GCP 上用到的产品形态、能力组合，落到阿里云的等价或类似方案上。不是简单产品映射——而是按业务场景给出可落地的架构、组件选型、限制说明、改造清单。

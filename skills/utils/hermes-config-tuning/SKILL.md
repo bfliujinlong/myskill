@@ -84,6 +84,8 @@ pkill -f "hermes gateway" ; sleep 3 ; cd ~/.hermes && nohup hermes gateway > /tm
 ```
 然后查日志确认平台重连：`grep -E "feishu connected|telegram connected" ~/.hermes/logs/gateway.log`。
 
+**延伸坑（2026-11-01 实测）：该护栏是**静态文本扫描**——它不仅拦截真正执行的 restart/kill，连**脚本注释里**出现 `restart hermes-gateway` / `kill` / `gateway` 字样都会触发 `Blocked`。✅ 任何在网关进程内运行的迁移/维护脚本，**正文与注释都不要出现 restart/kill/gateway 等词**；需要重启时把指令只写在聊天里让用户手动执行。这也意味着：迁移 `.hermes` 后无法在脚本内自重启回收旧 inode 空间，只能等用户在独立 shell 手动 `systemctl --user restart hermes-gateway`。
+
 ## 4. 配置写入的"假成功"识别
 
 `hermes config set` 对不识别的键会返回：

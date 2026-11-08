@@ -177,11 +177,12 @@ def detect_sensitive_data(text, context='报告'):
 
 class ReportConfig:
     """报告全局配置"""
-    PRIMARY_COLOR = '2F5496'
-    HEADER_BG = '2F5496'
+    # 黑灰配色，无蓝（符合投标/技术文档规范）；WARNING_BG 保留橙色仅用于高风险行高亮
+    PRIMARY_COLOR = '333333'
+    HEADER_BG = '333333'
     HEADER_COLOR = 'FFFFFF'
-    ALT_ROW_BG = 'F2F7FF'
-    TITLE_COLOR = '2F5496'
+    ALT_ROW_BG = 'F2F2F2'
+    TITLE_COLOR = '333333'
     WARNING_BG = 'FFF3E0'
     SUCCESS_BG = 'E8F5E9'
 
@@ -420,6 +421,15 @@ def generate_report(survey_data, output_dir, customer_name=None, project_name=No
     project = project_name or survey_data.get('project_name', f'{name}云平台迁移项目')
     source_cloud = survey_data.get('source_cloud', '未知')
     today = datetime.now()
+    # 目标云平台与编制单位均可配置；保持阿里云目标时的原始默认表现，其余目标用中性编制单位
+    # Ali 目标支持中文/英文别名，确保英文写法（如 "Alibaba Cloud"）也能正确识别并统一展示为「阿里云」
+    target_cloud_raw = survey_data.get('target_cloud', '阿里云')
+    _ALI_ALIASES = ('阿里云', 'alibaba cloud', 'alibaba', 'aliyun', '阿里')
+    is_ali = isinstance(target_cloud_raw, str) and target_cloud_raw.strip().lower() in _ALI_ALIASES
+    target_cloud = '阿里云' if is_ali else target_cloud_raw
+    prepared_by = survey_data.get('prepared_by') or (
+        '阿里云智能集团' if is_ali else '云平台迁移调研评估'
+    )
     date_str = f'{today.year}年{today.month}月'
     doc_version = survey_data.get('version', 'V1.0')
 
@@ -478,7 +488,7 @@ def generate_report(survey_data, output_dir, customer_name=None, project_name=No
         f'项目名称：{project}',
         f'客户单位：{name}',
         f'源云平台：{source_cloud}',
-        '编制单位：阿里云智能集团',
+        f'编制单位：{prepared_by}',
         f'编制日期：{date_str}',
         f'文档版本：{doc_version}',
         '密    级：内部保密'
@@ -505,7 +515,7 @@ def generate_report(survey_data, output_dir, customer_name=None, project_name=No
     overview_data = [
         ['客户名称', name],
         ['源云平台', source_cloud],
-        ['目标平台', survey_data.get('target_cloud', '阿里云')],
+        ['目标平台', target_cloud],
         ['业务类型', survey_data.get('business_type', '待确认')],
         ['项目阶段', survey_data.get('project_stage', '调研阶段')],
     ]
@@ -585,10 +595,10 @@ def generate_report(survey_data, output_dir, customer_name=None, project_name=No
                 mapping_data.append([str(item[0]), '待确认', '待确认'])
     else:
         mapping_data = [
-            ['源产品A', '阿里云对应', '迁移方式'],
-            ['源产品B', '阿里云对应', '迁移方式'],
+            ['源产品A', f'{target_cloud}对应', '迁移方式'],
+            ['源产品B', f'{target_cloud}对应', '迁移方式'],
         ]
-    add_styled_table(doc, ['源云产品', '阿里云产品', '迁移方式'],
+    add_styled_table(doc, ['源云产品', f'{target_cloud}产品', '迁移方式'],
                      mapping_data, col_widths=[2, 2, 2])
 
     doc.add_page_break()
@@ -607,15 +617,15 @@ def generate_report(survey_data, output_dir, customer_name=None, project_name=No
                 add_styled_table(doc, ['项目', '方案'], detail_items, col_widths=[2, 4])
     else:
         add_heading_styled(doc, '4.1 计算迁移策略', level=2)
-        doc.add_paragraph('虚拟机部署业务可以采用 SMC 镜像迁移工具进行，但更建议采用重新部署的方式，避免把源主机上各类缓存等异常带入新环境中；如果容器化的业务，建议通过 CI/CD 方式在阿里云容器服务 ACK 中重新部署。')
+        doc.add_paragraph('虚拟机/裸金属业务建议优先采用重新部署方式（按目标云规格重建镜像与配置），避免将源端缓存、残留配置等异常带入目标环境；若源端为异构 Hypervisor（如 VMware/Hyper-V），可借助目标云提供的导入/迁移工具或第三方迁移工具完成整机搬迁。容器化业务建议在目标云托管 Kubernetes 服务（如 ACK、OKE、EKS、AKS、GKE、CCE、TKE）中通过 CI/CD 重新部署，不建议直接迁移容器集群本身。')
         add_heading_styled(doc, '4.2 存储迁移策略', level=2)
-        doc.add_paragraph('对象存储迁移使用阿里云在线迁移服务进行，需要重点关注元数据的同步（安全策略、生命周期配置等）和增量迁移方式（增量延迟受限于源端文件数量，每次增量扫描时间过长可能导致增量时间不可控，可以考虑增量事件订阅、镜像回源等方式处理增量）。')
+        doc.add_paragraph('对象/块/文件存储迁移建议使用目标云的对象存储迁移服务或数据同步工具完成，重点同步元数据（访问策略、生命周期、加密配置）与增量数据；增量同步耗时受源端对象数量影响，可结合事件订阅、镜像回源等方式控制增量窗口。大数据量搬迁需提前评估专线/公网带宽。')
         add_heading_styled(doc, '4.3 数据库迁移策略', level=2)
-        doc.add_paragraph('常规使用 DTS 进行全量+增量数据同步，割接时短暂停写完成最终切换。但是需要注意如果涉及到版本升级时，建议引入流量回放工具进行兼容性和性能评估（流量回放地址：https://help.aliyun.com/zh/cmh/cloud-migration-hub/traffic-replay），另外版本升级割接时需要考虑反向同步任务可能无法配置，需要提前考虑影响。')
+        doc.add_paragraph('数据库迁移通常使用目标云的数据迁移/同步服务（如 DTS、OCI Database Migration、AWS DMS、Azure DMS、GCP Database Migration Service、华为云 SMS、腾讯云 DTS）进行全量+增量同步，割接时短暂停写完成最终切换。涉及版本升级时，建议引入流量回放工具进行兼容性与性能评估，并提前规划反向同步不可用带来的影响。')
         add_heading_styled(doc, '4.4 网络与安全策略', level=2)
-        doc.add_paragraph('规划 VPC/VSwitch 网络架构，确定源端互联方式，配置安全组和 ACL，部署 WAF 和高防等安全防护。需要根据迁移数据量、时间要求评估带宽需求（VPN 还是专线），如果用 VPN 方式需尽量避免跨云调用。VPC 划分时需考虑转发路由器 TR 带来的流量转发成本，大量数据同步场景的业务尽量在一个 VPC。迁移过程中对公网流量无法清晰把握的情况下建议采用共享带宽。')
+        doc.add_paragraph('规划目标云 VPC/子网网络架构，确定跨云互联方式（VPN、专线、对等连接或转发路由），配置安全组与 ACL，部署 WAF 与 DDoS 防护。需根据迁移数据量与时间窗评估带宽，跨云调用应尽量规避。网络划分需考虑东西向流量转发成本，大规模数据同步业务尽量收敛在同一网络平面内。')
         add_heading_styled(doc, '4.5 中间件策略', level=2)
-        doc.add_paragraph('消息中间件迁移需要考虑端口变化、命名规范差异，阿里云消息中间件产品和开源版本不严格对标，但基本都兼容开源版本。')
+        doc.add_paragraph('消息中间件迁移需重点关注端口、命名规范与协议差异；主流托管消息产品与开源版本（Kafka/RabbitMQ/MQTT/RocketMQ）基本兼容，但参数与限制存在差异，迁移前需核对配额、分区/队列上限与客户端 SDK 兼容性。')
 
     doc.add_page_break()
 

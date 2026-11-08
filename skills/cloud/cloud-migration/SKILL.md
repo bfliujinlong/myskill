@@ -8,12 +8,16 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [云迁移, 上云, 搬迁, 割接, 6R, migration]
-    related_skills: [project-manager, presales-architect, multi-cloud]
+    related_skills: [project-manager, presales-architect, multi-cloud, alibabacloud-migration-survey, migration-plan-gen]
 ---
 
 # 云迁移（Cloud Migration）
 
 ## When to Use（何时使用）
+
+## 调研评估上游（alibabacloud-migration-survey）
+
+迁云评估阶段优先用 `alibabacloud-migration-survey` 产出结构化调研报告：已扩展为**源所有云（AWS/Azure/GCP/华为云/腾讯云/百度云/IDC）→ 目标所有云（含阿里云/OCI 等）**双向评估，输出客户画像、架构现状、云产品映射、版本兼容性风险、迁移风险与待确认事项。该报告是后续 6R 策略、迁移计划与报价测算的入口交付物（报告本身不报价、不实际迁移）。
 
 - 客户要从 IDC/友商云迁移到目标云（如阿里云/华为云/AWS/GCP）
 - 需要做迁移评估、制定 6R 策略、排迁移计划
@@ -21,6 +25,92 @@ metadata:
 - 迁移后成本对比、优化建议
 
 ## 标准工作流
+
+### 1. 知识库同步与团队结构
+- **知识库同步**：
+  - 使用 `sync_skills_to_learning.py` 脚本每日自动同步阿里云和腾讯 Skill Hub 的更新到各团队知识库。
+  - 目录结构：
+    ```
+    /home/ubuntu/.hermes/learning/{team_name}/skills/
+    /home/ubuntu/.hermes/learning/{team_name}/daily_logs/
+    ```
+  - 脚本：
+    ```python
+    #!/usr/bin/env python3
+    import os
+    import json
+    from datetime import datetime
+    
+    def create_daily_log(team_name, learning_content):
+        log_dir = os.path.join(f"/home/ubuntu/.hermes/learning/{team_name}", "daily_logs")
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, f"{datetime.now().strftime('%Y-%m-%d')}.md")
+        with open(log_file, 'w') as f:
+            f.write(f"---
+date: {datetime.now().strftime('%Y-%m-%d')}
+team: {team_name}
+---
+{learning_content}")
+    
+    def sync_skills_to_learning(skills_data, team_name):
+        skills_dir = os.path.join(f"/home/ubuntu/.hermes/learning/{team_name}", "skills")
+        os.makedirs(skills_dir, exist_ok=True)
+        for skill in skills_data:
+            skill_file = os.path.join(skills_dir, f"{skill['name']}.json")
+            with open(skill_file, 'w') as f:
+                json.dump(skill, f, indent=2, ensure_ascii=False)
+    
+    # 示例调用
+    teams = ['ceo', 'finops', 'compliance', 'ops', 'presales', 'migration-architect', 'aiops', 'devops', 'ops-monitoring', 'data', 'junior-dev', 'delivery']
+    skills_data = [{"name": "bailian-cli", "status": "updated"}]
+    for team in teams:
+        sync_skills_to_learning(skills_data, team)
+        create_daily_log(team, "学习内容...")
+    ```
+
+- **团队结构**：
+  - 12 个团队，每个团队对应特定技术领域（AIOps、FinOps、大数据迁移等）和角色（售前、架构师、运维等）。
+  - 知识库体系：Hermes + Obsidian，支持自主学习、知识积累和跨域协作。
+
+### 2. 风险分析与预留
+- **风险预留**：
+  - 将风险预留从 13 人日提高到 **30–35 人日**，或改为“风险预留按实际发生另计”。
+  - 风险登记表：
+    - 识别技术陷阱、成本超支风险、角色定义模糊点。
+    - 补充《首期范围确认单》以明确交付物范围。
+    - 设独立里程碑以应对 ServiceNow 联调和 AgentCore 交付时间点的不确定性。
+
+### 3. 现状盘点（发现）
+- **资源清单**：
+  - 计算、存储、网络、数据库、中间件、依赖的第三方服务
+  - 耦合关系、量级、合规要求（等保/数据出境）
+
+### 4. 6R 策略定级
+| 策略 | 含义 | 适用 |
+|------|------|------|
+| Rehost 重新托管 | 直接搬（lift-shift） | 紧急上云、标准化应用 |
+| Replatform 平台重构 | 小改适配托管服务 | 想减负运维 |
+| Refactor 重构 | 云原生改造 | 长期成本/弹性诉求 |
+| Repurchase 替换 | 换 SaaS | 非核心系统 |
+| Retain 保留 | 暂不移 | 合规/依赖未清 |
+| Retire 退役 | 下线 | 僵尸系统 |
+
+### 5. 迁移计划模板
+- 分批：先非核心→核心；先只读→读写
+- 每批：评估→改造→演练→割接→观察
+- 割接窗口：选低峰，明确起止、负责人、通讯群
+- 回滚：数据快照/镜像前置，5 分钟内可回退
+
+### 6. 割接检查清单
+- [ ] 全量+增量数据同步完成，差异<阈值
+- [ ] 一致性校验脚本通过
+- [ ] DNS/网关切换预案就绪
+- [ ] 旧环境保留可回滚（不立即销毁）
+- [ ] 监控告警覆盖新环境
+- [ ] 业务方验收口径一致
+
+### 7. 成本对比
+迁移前后 TCO：一次性（迁移人天）+ 月度（资源+流量+运维）对比，量化上云收益。
 
 ### 1. 现状盘点（发现）
 - 资源清单：计算/存储/网络/数据库/中间件/依赖的第三方服务
@@ -117,3 +207,37 @@ print(f"\n开口项(责任人+是否已修复同空): {blank}, 均一致率<90%�
 - 旧环境割完立刻销毁，回滚无门
 - 低估跨云网络成本（出网流量/专线）
 - 双跑报告只登记不结论：开口项无人认领、总览判通过但明细不通过未解释、低一致率表淹没在"已上线"多数里
+
+## 报价单交付格式（安畅 Excel 模板）
+
+最终报价/人天交付物**默认用 Excel（安畅 PS 报价模板），不是 Word**。客户是外企时文档正文/会议用英文；报价 Excel 模板版式固定。
+
+### 模板（固定版式，勿改结构）
+- 采用模板：`/tmp/51D0E267-D2D0-44E2-9E10-01DCA671A74C.xlsx`（双 sheet：`云迁移报价单` + `评估人天逻辑`）。
+- 实施脚本样例（AIA 项目）：`/home/ubuntu/客户项目/AIA_云迁移/build_aia_xlsx.py`（clone 模板 → 填表头锚点 + 明细行 + 重算逻辑页 → `soffice --headless` 重算公式落盘）。
+- 字体：微软雅黑；小节标题填充 `FFF2F2F2`；金额格式 `\¥#,##0.00`；税率 `0%`；配色黑灰无蓝。
+
+### 表头锚点（合并单元格必须写左上锚点，勿写非锚点格）
+- 客户名称 `D5`；供应商 `D7`；客户经理名 `G7`/电话 `I7`/邮件 `I8`；架构师名 `G9`/电话 `I9`/邮件 `I10`。
+- 客户联系人/电话/邮件（锚点 `E5`/`I5`/`I6`）填"待确认"，**勿把安畅的联系方式当客户联系方式**。
+- 付款周期 `K7`=一次性；货币 `K9`=人民币；日期 `K5`=`=TODAY()`；有效期 `K6`=30天。
+- 明细区 `B15:I18`（序号/产品名称/产品详情/数量/税率/单价G/小计I/备注K）；`B19`=不含税、`B20`=含税。
+
+### 税公式方向（易错，严重）
+- 模板默认假设**列 I 小计是含税**，自带 `G19=G20/1.06`、`G20=SUM(I15:J18)`。
+- 若 rate card 单价是**不含税**（AIA 即此情况：架构师/PM ¥2,500、工程师 ¥1,900、税 6%），必须**反转公式**：
+  `G19`(不含税)=`SUM(I15:I18)`，`G20`(含税)=`G19*1.06`，列 I 保持 `=E*G`（不含税行小计）。
+- 出文件前用 `soffice --headless --convert-to xlsx` 重算，断言 `G19`/`G20` 与守恒脚本一致。
+
+### Rate card 冲突处理
+- 模板示例单价 ¥3,300 是别的项目基数，**不套用**；以本项目已验证 rate card 为准，并在「特别说明」标注冲突点。
+- 模板示例人天（415.5/192.5/67.6）是别的项目基数，用本项目实测人天。**绝不在 docx/xlsx 虚构人员或案例**（废标风险）。
+
+### 守恒纪律（落盘前必跑）
+- 不含税总额 == Σ(人日×单价) == `pricing_result.json`；总人日 == 各行 quantity 之和。
+- Package 小计之和 == 角色小计之和 == 总额；IaC 单独报价文档金额 == 主报价对应 Package，独立文档但**不重复计列**。
+- 独立 verify 闸门（如 `verify_aia_pricing.py`，`errors:[]` 才出报价）。报价标注 `PREVIEW` 不批价。
+
+### IaC 单独报价
+- 单独 xlsx，金额 = 主报价对应 WS3 包（如 AIA：架构师 60×¥2,500 + 工程师 180×¥1,900 = 不含税 ¥492,000 / 含税 ¥521,520）。
+- 风险预留（共享）只计在主报价，IaC 文件不重复计列，仅在特别说明引用。
