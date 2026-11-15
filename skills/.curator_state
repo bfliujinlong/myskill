@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/bfyalong/.hermes/logs/curator/20261101-112754",
-  "last_run_at": "2026-11-01T11:27:54.712158+00:00",
-  "last_run_duration_seconds": 3.839934,
-  "last_run_summary": "auto: no changes; llm: skipped (consolidation off)",
+  "last_report_path": "/home/bfyalong/.hermes/logs/curator/20261115-123111",
+  "last_run_at": "2026-11-15T12:31:11.875027+00:00",
+  "last_run_duration_seconds": 14.752115,
+  "last_run_summary": "auto: 3 archived; llm: skipped (consolidation off)",
   "last_run_summary_shown_at": "2026-10-25T11:00:38.308270+00:00",
   "paused": false,
-  "run_count": 11
+  "run_count": 13
 }

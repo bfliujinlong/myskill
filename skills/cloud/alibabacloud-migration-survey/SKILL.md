@@ -336,3 +336,10 @@ The report is a Chinese `.docx` document containing a cover page, table of conte
 - File extraction script: [scripts/extract.py](scripts/extract.py)
 - Missing-input reconstruction script (fallback): [scripts/prepare_sample_input.py](scripts/prepare_sample_input.py)
 - Report generation script: [scripts/generate_report.py](scripts/generate_report.py)
+
+## 关联能力：阿里云 SCP 区域限制真实验证（Landing Zone 管控核查）
+
+客户迁云到阿里云并启用资源目录 / Landing Zone 后，常需核查各服务的 RAM action 在管控策略（SCP）下是否支持 `cn-shanghai` 区域限制、是否需要 `Resource "*"`（例如 Lilly 管控策略测试项目）。该能力已固化为独立 skill：
+- **`aliyun-scp-region-test`**（路径 `r0-aliyun-scp-region-test`）：以成员账号 + STS 扮演角色，对每个服务的 write action 做真实 API 调用，两阶段对比 / 三步法判定 SCP 区域限制是否生效，输出含真实 RequestId 的 A4 黑灰 PDF，并经飞书交付 + 回写 Excel 证据列。
+- 触发词（中文）：「真实测试 SCP 区域限制」「把前 N 个服务都真实测一下出 PDF」「按 Excel 的 SCP 要求逐行验证」「阿里云管控策略回填」。
+- 注意：本 migration-survey skill 仅做信息梳理/报告，不执行真实云 API 调用；真实 SCP 测试请切换到 `aliyun-scp-region-test`。

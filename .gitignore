@@ -56,8 +56,26 @@ skills/.archive/
 skills/.bundled_manifest
 skills/.usage.json
 skills/.locks/
-**/.env
-**/credentials/
-**/__pycache__/
-**/*.pyc
-**/node_modules/
+
+# 可重装二进制/生成物 —— 曾因 git add -A 误入历史(918MB: chromium/libpython/ffmpeg/node),
+# 导致 push repack 在此 955MiB VM 上 OOM(signal 9) + GitHub GH001 拒收。永不入库。
+tools/
+bin/
+node/
+*.tmp
+*.lock
+.gateway_state_*.tmp
+.hermes_history
+.cloud-docs/
+
+# 运行态: 日志/pid/lock/db-wal/cron 输出/索引缓存 —— 非备份资产, 无需进仓库
+*.secretbak
+gateway*.log
+gateway.pid
+gateway.lock
+state.db-*
+cron/output/
+cron/external-workers/
+.curator_backups/
+source-checks/
+plugin-update-checks/

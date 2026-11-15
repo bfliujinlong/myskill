@@ -25,6 +25,7 @@ metadata:
 | `references/selling.md` | 报价结构、中英双语分文件、去 AI 味清单、客户沟通 |
 | `references/output-style.md` | 语言、结构、状态符号、交付物格式、工作习惯 |
 | `references/codebuddy-auth-bridge.md` | CodeBuddy(auth提取/桥接/隧道/CF UI更新)步骤与坑 |
+| `references/sow-template-anchnet.md` | 安畅 SOW 通用脱敏模板母版(14章+附录E+红线);实例对照 Lilly_SOW_V1.1_安畅模板.md;生成脚本 build_sow_anchnet.py/official.py |
 
 # 硬边界（速记）
 - 凭证只写本地文件不进对话；不编造数字（未核实就标注）；AI 能力必须走 Skill → Prompt → LLM → Structured Output；外部动作先确认，内部动作直接做；核心问题未解决不中断。
