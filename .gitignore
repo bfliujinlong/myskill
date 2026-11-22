@@ -79,3 +79,8 @@ cron/external-workers/
 .curator_backups/
 source-checks/
 plugin-update-checks/
+**/.env
+**/credentials/
+**/__pycache__/
+**/*.pyc
+**/node_modules/
