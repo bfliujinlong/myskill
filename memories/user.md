@@ -1,0 +1,6 @@
+- 用户身份: jinlongliu, OPC+FDE, 云迁移/MSP 售前
+- 偏好: 免费模型优先, 零费用, 不花信用卡
+- 当前主模型: nvidia/nemotron-3.5-lightning:free @ openrouter
+- 已清理: dsh/openmaic/qwen, 备份完整
+- 通道: telegram(200), dingtalk(auth ok), feishu(mcp ok)
+- 规则: 技术参数先查官方文档; 难任务只用 Azure gpt-4o

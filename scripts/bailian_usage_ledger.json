@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "date": "2026-10-13 03:34:38",
+      "model": "glm-5.2",
+      "prompt_tokens": 13,
+      "completion_tokens": 10,
+      "total_tokens": 23,
+      "cost_cny": 0.000384,
+      "credits": 0.0985
+    },
+    {
+      "date": "2026-10-13 03:34:38",
+      "model": "glm-5.2",
+      "prompt_tokens": 500,
+      "completion_tokens": 200,
+      "total_tokens": 700,
+      "cost_cny": 0.0096,
+      "credits": 2.4615
+    }
+  ]
+}
