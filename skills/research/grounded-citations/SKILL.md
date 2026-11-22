@@ -153,6 +153,8 @@ newer than March") rather than silently narrowing to what worked.
 
 ## Fact-Checking Mode
 
+For empirical/test claims (API calls, test logs, validation tables), use the evidence tiers in `references/empirical-evidence-grading.md`.
+
 For work where the reader must be able to check the chain — medical, legal,
 financial, safety, disputed claims, or when the user asks for fact-checking —
 upgrade from citations to evidence:

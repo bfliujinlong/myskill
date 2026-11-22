@@ -80,6 +80,13 @@ cronjob create \
 
 或者在 config.yaml 中配置后使用 hermes config set。
 
+## 本机通知通道现状（bfyalong 主机）
+
+- `hermes send --list` 仅返回 `telegram:jinlongliu`；无 SMS/Twilio/Signal/WhatsApp 通道。
+- 环境变量中无 `SMS_GATEWAY_URL` / `TWILIO_*`，也无 `twilio`/`sms` CLI。脚本 `send_sms()` 必然返回「未配置」，属如实报告，不要伪造发送成功。
+- 在 cron 内运行 `gcp-billing-monitor.py` 时，脚本里的 `hermes send --to telegram:5701842056` 会被跳过（提示 cron 会自动投递最终回复到同一目标）。因此 UTC 报告正文必须写在最终 response 里，不要依赖脚本内那条 send。
+- Cloud Billing API 在该项目被禁用：脚本走降级模式（本机 metadata + lsblk + /sys/class/net 对照 Free Tier 额度）。「费用未知」≠ $0，不能据此宣称未超 $0.1 阈值。出向计数器含同区域内网流量，外推超 1 GiB 只是黄色信号，不是确认计费。
+
 ## 常见问题
 
 ### Q: 为什么在项目 IAM 中找不到 Billing Viewer 角色？

@@ -91,6 +91,24 @@ for line in d['data']['annotated_csv'].split('\n'):
 - 单元格含逗号会被引号包裹，直接按 `,` split 会切错；要分列就用 csv 模块，否则只取前几列。
 - 表格分享密码属凭证，一律 [REDACTED]，不进 skill/记忆/交付文档。
 
+## 飞书云盘文件（`/file/`）下载
+
+`docsync.py` 与 `sheets +csv-get` 都**不覆盖 `/file/` 云盘文件**（docx/wiki/sheets 之外的裸文件，如 xlsx、pdf）。
+对 `https://anchnet.feishu.cn/file/<token>` 跑 `docsync` 会失败——别浪费时间重试，直接走 `lark-cli drive +download`：
+
+```bash
+export PATH=$PATH:/home/ubuntu/.npm-global/bin
+TOK=<file_token>            # URL /file/ 后第一段
+lark-cli drive +inspect --url "https://anchnet.feishu.cn/file/$TOK"   # 可选：确认文件信息
+lark-cli drive +download --file-token "$TOK" --output "/home/ubuntu/<name>.xlsx" --overwrite
+```
+
+下载后 xlsx 用 `openpyxl`：`wb=openpyxl.load_workbook(path, data_only=True)`，`wb.sheetnames` 看子表。
+非空单元格多时先整表导出到 `/home/ubuntu/_<name>_dump.txt` 再 `read_file`，别靠 stdout。
+需比对两列时把差异也单独落盘（如 `_diff.txt`）再读。
+
+- URL 形式判路由：`/docx/`→docsync、`/wiki/`→docsync、`/sheets/`→`sheets +csv-get`、`/file/`→`drive +download`。
+
 ## 踩过的坑
 
 - 钉钉 `dws doc list` 已废弃 → 用 `dws drive list --workspace <id>` 或 `dws wiki node list`。
@@ -101,6 +119,7 @@ for line in d['data']['annotated_csv'].split('\n'):
 - 飞书 `/docx/v1/documents/{id}/blocks` 默认 page_size 500，超长文档要翻页——当前未实现翻页，长文档会截断。
 - **terminal 的 stdout 会被吞**：命令后接 `| head` 或让 python 直接打印，高频只回 `exit 0` + 1 行。一律**先落盘再 `read_file`**，不要用 stdout 判断成败。
 - **落盘成功 ≠ 拿到了内容**：`ls -la` 看到文件不等于里面有数据，必须 `read_file` 解析出正文后再下结论。禁止基于不可见输出断言「读成功了 / 清单已确认」——实际可能一行都没输出。
+- **长分析跨上下文压缩时，中间结论必须写入具名磁盘文件再 `read_file` 回读**：`execute_code` 的输出正文和对话上下文会在压缩后丢失（只剩「1 lines output」），只有磁盘文件能续做。每完成一步就把结构化结果 append 到固定文件，别指望工具输出留在上下文里。
 
 ## 权限边界
 
